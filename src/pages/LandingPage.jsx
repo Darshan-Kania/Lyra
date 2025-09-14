@@ -113,9 +113,15 @@ const LandingPage = () => {
   
   // Redirect if already logged in
   useEffect(() => {
-    if (isAuthenticated()) {
-      navigate('/dashboard');
-    }
+    // Static check - we'll allow users to stay on landing page for now
+    // Uncomment this to auto-redirect to dashboard
+    /*
+    isAuthenticated().then(isAuth => {
+      if (isAuth) {
+        navigate('/dashboard');
+      }
+    });
+    */
   }, [navigate]);
   // --- Particle Background Initialization ---
   const particlesInit = React.useCallback(async (engine) => {

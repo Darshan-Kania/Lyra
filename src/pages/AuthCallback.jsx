@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { handleOAuthCallback } from '../utils/auth';
+import { handleTokenLogin } from '../utils/auth';
 
 const AuthCallback = () => {
   const [searchParams] = useSearchParams();
@@ -10,38 +10,76 @@ const AuthCallback = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    let isMounted = true;
+    let redirectTimer = null;
+    
     const processAuth = async () => {
-      const code = searchParams.get('code');
-      const error = searchParams.get('error');
-      
-      if (error) {
-        setStatus('Authentication failed');
-        setError(error);
-        return;
-      }
-      
-      if (!code) {
-        setStatus('Missing authentication code');
-        setError('No authorization code provided');
-        return;
-      }
-      
       try {
-        setStatus('Verifying your account...');
-        await handleOAuthCallback(code);
-        setStatus('Login successful! Redirecting...');
+        // In static mode, we'll just simulate successful authentication
+        const userData = await handleTokenLogin("mock-token-from-oauth");
         
-        // Redirect to dashboard after short delay
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 1000);
-      } catch (err) {
-        setStatus('Authentication failed');
-        setError(err.message || 'Failed to authenticate');
+        if (!isMounted) return;
+        
+        if (userData) {
+          console.log("AuthCallback: Authentication successful");
+          setLocalAuthStatus(true);
+          
+          if (isMounted) {
+            setStatus('Login successful! Redirecting...');
+          }
+          
+          // Wait a moment to ensure state is updated
+          redirectTimer = setTimeout(() => {
+            if (isMounted) {
+              console.log("AuthCallback: Redirecting to dashboard");
+              navigate('/dashboard', { replace: true });
+            }
+          }, 500);
+        } else {
+          console.log("AuthCallback: Failed to get user data with token");
+          setLocalAuthStatus(false);
+          
+          if (isMounted) {
+            setStatus('Authentication failed');
+            setError('Failed to authenticate with the server');
+            
+            // Redirect to landing page after delay
+            redirectTimer = setTimeout(() => {
+              if (isMounted) {
+                navigate('/', { replace: true });
+              }
+            }, 2000);
+          }
+        }
+            } catch (error) {
+        console.error("AuthCallback: Error checking JWT authentication status", error);
+        
+        if (isMounted) {
+          setLocalAuthStatus(false);
+          setStatus('Authentication error');
+          setError(error.message || 'Failed to complete authentication');
+          
+          // Redirect to landing page after delay
+          redirectTimer = setTimeout(() => {
+            if (isMounted) {
+              navigate('/', { replace: true });
+            }
+          }, 2000);
+        }
+      }
+    };
+
+    checkAuthStatus();
+    
+    return () => {
+      isMounted = false;
+      // Clear any pending timers
+      if (redirectTimer) {
+        clearTimeout(redirectTimer);
       }
     };
     
-    processAuth();
+    checkAuthStatus();
   }, [searchParams, navigate]);
 
   return (

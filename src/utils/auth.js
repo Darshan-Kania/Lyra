@@ -1,128 +1,192 @@
-import axios from 'axios';
+/**
+ * Static auth utilities for MailFlare
+ * No backend calls - purely for UI display purposes
+ */
 
-// Constants
-const API_URL = 'http://localhost:8000'; // Make sure this matches your backend server URL
-
-// Authentication State Management
-const AUTH_STORAGE_KEY = 'mailflare_auth';
+// Authentication user profile & token cache keys
+const USER_CACHE_KEY = 'mailflare_user';
+const TOKEN_CACHE_KEY = 'mailflare_token';
 
 /**
- * Store authentication data in local storage
- * @param {Object} authData - Authentication data received from the backend
+ * Store user profile data in local storage
+ * @param {Object} userData - User profile data
  */
-export const storeAuthData = (authData) => {
-  localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authData));
+export const storeUserData = (userData) => {
+  localStorage.setItem(USER_CACHE_KEY, JSON.stringify(userData));
 };
 
 /**
- * Get stored authentication data
- * @returns {Object|null} Authentication data or null if not found
+ * Get stored user profile data
+ * @returns {Object|null} User data or null if not found
  */
-export const getAuthData = () => {
-  const data = localStorage.getItem(AUTH_STORAGE_KEY);
+export const getUserData = () => {
+  const data = localStorage.getItem(USER_CACHE_KEY);
   return data ? JSON.parse(data) : null;
 };
 
 /**
- * Remove authentication data from local storage
+ * Remove user data from local storage
  */
-export const clearAuthData = () => {
-  localStorage.removeItem(AUTH_STORAGE_KEY);
+export const clearUserData = () => {
+  localStorage.removeItem(USER_CACHE_KEY);
+  localStorage.removeItem(TOKEN_CACHE_KEY);
 };
 
 /**
- * Check if user is authenticated
- * @returns {boolean} True if user has valid auth data
+ * Store authentication token in local storage
+ * @param {string} token - JWT token
  */
-export const isAuthenticated = () => {
-  const authData = getAuthData();
-  if (!authData || !authData.accessToken) return false;
-  
-  // Optional: Check token expiration if your backend provides expiry
-  if (authData.expiresAt && new Date(authData.expiresAt) < new Date()) {
-    clearAuthData();
-    return false;
-  }
-  
+export const storeToken = (token) => {
+  localStorage.setItem(TOKEN_CACHE_KEY, token);
+};
+
+/**
+ * Get authentication token from local storage
+ * @returns {string|null} Token or null if not found
+ */
+export const getToken = () => {
+  return localStorage.getItem(TOKEN_CACHE_KEY);
+};
+
+/**
+ * Check if user is authenticated (static version - always returns true)
+ * @returns {Promise<boolean>} True if authenticated
+ */
+export const isAuthenticated = async () => {
   return true;
 };
 
 /**
- * Initiate Google OAuth login flow
- */
-export const initiateGoogleLogin = () => {
-  // Redirect to backend OAuth endpoint
-  window.location.href = `${API_URL}/auth/google`;
-};
-
-/**
- * Handle OAuth callback from backend
- * @param {string} authCode - Authorization code or token from the query params
- * @returns {Promise} Promise resolving to user data
- */
-export const handleOAuthCallback = async (authCode) => {
-  try {
-    // Exchange auth code for tokens
-    const response = await axios.post(`${API_URL}/auth/callback`, { code: authCode });
-    
-    if (response.data && response.data.accessToken) {
-      storeAuthData(response.data);
-      return response.data.user;
-    }
-    
-    throw new Error('Invalid authentication response');
-  } catch (error) {
-    console.error('OAuth callback error:', error);
-    throw error;
-  }
-};
-
-/**
- * Log out the current user
- */
-export const logout = () => {
-  clearAuthData();
-  // Optionally notify backend about logout
-  axios.post(`${API_URL}/auth/logout`).catch(err => {
-    console.error('Logout error:', err);
-  });
-};
-
-/**
- * Get the current authenticated user profile
- * @returns {Promise} Promise resolving to user data
+ * Get current user (static version - returns mock user)
+ * @returns {Promise<Object>} User data
  */
 export const getCurrentUser = async () => {
-  if (!isAuthenticated()) {
-    return null;
-  }
+  const staticUser = {
+    id: "1234567890",
+    name: "John Doe",
+    email: "john.doe@example.com",
+    avatarUrl: "https://randomuser.me/api/portraits/men/32.jpg",
+    role: "user"
+  };
   
-  try {
-    const authData = getAuthData();
-    const response = await axios.get(`${API_URL}/auth/me`, {
-      headers: {
-        Authorization: `Bearer ${authData.accessToken}`
-      }
-    });
-    
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.status === 401) {
-      clearAuthData();
-    }
-    console.error('Failed to get current user:', error);
-    return null;
-  }
+  return staticUser;
 };
 
-// Axios interceptor to add authentication token to requests
-axios.interceptors.request.use(
-  (config) => {
-    const authData = getAuthData();
-    if (authData && authData.accessToken) {
-      config.headers.Authorization = `Bearer ${authData.accessToken}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+/**
+ * Login user (static version - always succeeds)
+ * @param {string} email - User email
+ * @param {string} password - User password
+ * @returns {Promise<Object>} User data and token
+ */
+export const login = async (email, password) => {
+  const mockResponse = {
+    user: {
+      id: "1234567890",
+      name: email.split('@')[0],
+      email: email,
+      avatarUrl: "https://randomuser.me/api/portraits/men/32.jpg",
+      role: "user"
+    },
+    token: "mock-jwt-token-1234567890"
+  };
+  
+  // Store the data as if it came from a real API
+  storeUserData(mockResponse.user);
+  storeToken(mockResponse.token);
+  
+  return mockResponse;
+};
+
+/**
+ * Register new user (static version - always succeeds)
+ * @param {Object} userData - User registration data
+ * @returns {Promise<Object>} User data and token
+ */
+export const register = async (userData) => {
+  const mockResponse = {
+    user: {
+      id: "1234567890",
+      name: userData.name || userData.email.split('@')[0],
+      email: userData.email,
+      avatarUrl: "https://randomuser.me/api/portraits/men/32.jpg",
+      role: "user"
+    },
+    token: "mock-jwt-token-1234567890"
+  };
+  
+  // Store the data as if it came from a real API
+  storeUserData(mockResponse.user);
+  storeToken(mockResponse.token);
+  
+  return mockResponse;
+};
+
+/**
+ * Logout user (static version - clears local storage)
+ * @returns {Promise<void>}
+ */
+export const logout = async () => {
+  clearUserData();
+};
+
+/**
+ * Update user profile (static version - always succeeds)
+ * @param {Object} userData - User data to update
+ * @returns {Promise<Object>} Updated user data
+ */
+export const updateUserProfile = async (userData) => {
+  const currentUser = getUserData() || {};
+  const updatedUser = { ...currentUser, ...userData };
+  
+  storeUserData(updatedUser);
+  return updatedUser;
+};
+
+/**
+ * Initiate Google OAuth login flow (static version)
+ * This normally would redirect to Google, but we'll just simulate successful login
+ */
+export const initiateGoogleLogin = () => {
+  const mockUser = {
+    id: "g-1234567890",
+    name: "Google User",
+    email: "google.user@example.com",
+    avatarUrl: "https://randomuser.me/api/portraits/men/43.jpg",
+    role: "user"
+  };
+  
+  storeUserData(mockUser);
+  storeToken("mock-google-token-1234567890");
+  
+  // Simulate redirect back to the app
+  window.location.href = "/";
+};
+
+/**
+ * Process authentication response (static version)
+ * @param {Object} authResponse - Auth response
+ * @returns {Object} User data
+ */
+export const processAuthResponse = (authResponse) => {
+  return {
+    id: "1234567890",
+    name: "Auth Response User",
+    email: "auth.response@example.com",
+    avatarUrl: "https://randomuser.me/api/portraits/men/22.jpg",
+    role: "user"
+  };
+};
+
+/**
+ * Handle token login (static version)
+ * @returns {Promise<Object>} User data
+ */
+export const handleTokenLogin = async () => {
+  return {
+    id: "token-1234567890",
+    name: "Token User",
+    email: "token.user@example.com", 
+    avatarUrl: "https://randomuser.me/api/portraits/men/67.jpg",
+    role: "user"
+  };
+};
