@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim";
 import { Footer } from "../components/common/Footer";
+import { initiateGoogleLogin, isAuthenticated } from "../utils/auth";
+import { useNavigate } from "react-router-dom";
 
 // --- Icon Components (inlined to avoid extra dependencies) ---
 const MailIcon = ({ className }) => (
@@ -107,6 +109,14 @@ const features = [
 
 // --- Main Landing Page Component ---
 const LandingPage = () => {
+  const navigate = useNavigate();
+  
+  // Redirect if already logged in
+  useEffect(() => {
+    if (isAuthenticated()) {
+      navigate('/dashboard');
+    }
+  }, [navigate]);
   // --- Particle Background Initialization ---
   const particlesInit = React.useCallback(async (engine) => {
     await loadSlim(engine);
@@ -233,9 +243,9 @@ const LandingPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               className="flex items-center gap-2 px-4 py-2 bg-white text-gray-800 rounded-lg font-semibold shadow-md hover:bg-gray-100 border border-gray-200 transition-colors duration-300"
-              onClick={() => {
-                
-              }}
+              onClick={initiateGoogleLogin}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               <img
                 src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/768px-Google_%22G%22_logo.svg.png"
