@@ -1,9 +1,10 @@
 import React, { useEffect } from "react";
+import Confetti from "react-confetti";
 import { motion } from "framer-motion";
 import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim";
 import { Footer } from "../components/common/Footer";
-import { initiateGoogleLogin } from "../utils/auth.js";
+import { initiateGoogleLogin, isAuthenticated } from "../utils/auth.js";
 import { useNavigate } from "react-router-dom";
 
 // --- Icon Components (inlined to avoid extra dependencies) ---
@@ -108,21 +109,38 @@ const features = [
 ];
 
 // --- Main Landing Page Component ---
+import { useLocation } from "react-router-dom";
+
 const LandingPage = () => {
   const navigate = useNavigate();
-  
-  // Redirect if already logged in
+  const location = useLocation();
+  const [buttonShow, setButtonShow] = React.useState({ func: initiateGoogleLogin, msg: "Login with Google" });
+  const [showSuccess, setShowSuccess] = React.useState(false);
+  const [showError, setShowError] = React.useState(false);
   useEffect(() => {
-    // Static check - we'll allow users to stay on landing page for now
-    // Uncomment this to auto-redirect to dashboard
-    /*
-    isAuthenticated().then(isAuth => {
+    const checkAuth = async () => {
+      const isAuth = await isAuthenticated();
       if (isAuth) {
-        navigate('/dashboard');
+        setButtonShow({ func: () => navigate("/dashboard"), msg: "Go to Dashboard" });
       }
-    });
-    */
+    };
+    checkAuth();
   }, [navigate]);
+
+  // Show popup if redirected from AuthCallback
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const auth = params.get("auth");
+    if (auth === "success") {
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 5000);
+      navigate("/", { replace: true });
+    } else if (auth === "failed") {
+      setShowError(true);
+      setTimeout(() => setShowError(false), 5000);
+      navigate("/", { replace: true });
+    }
+  }, [location, navigate]);
   // --- Particle Background Initialization ---
   const particlesInit = React.useCallback(async (engine) => {
     await loadSlim(engine);
@@ -224,6 +242,19 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 font-sans antialiased relative overflow-hidden">
+      {showSuccess && (
+        <>
+          <Confetti width={window.innerWidth} height={window.innerHeight} numberOfPieces={300} recycle={false} />
+          <button className="fixed top-8 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg z-50 text-lg font-semibold">
+            Login Successful
+          </button>
+        </>
+      )}
+      {showError && (
+        <div className="fixed top-8 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50">
+          Auth failed
+        </div>
+      )}
       {/* Animated Particle Background */}
       <Particles
         id="tsparticles"
@@ -249,7 +280,7 @@ const LandingPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               className="flex items-center gap-2 px-4 py-2 bg-white text-gray-800 rounded-lg font-semibold shadow-md hover:bg-gray-100 border border-gray-200 transition-colors duration-300"
-              onClick={initiateGoogleLogin}
+              onClick={buttonShow.func}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -258,7 +289,7 @@ const LandingPage = () => {
                 alt="Google Logo"
                 className="w-5 h-5"
               />
-              Login with Google
+              {buttonShow.msg}
             </motion.button>
           </div>
         </header>
