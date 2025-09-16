@@ -27,12 +27,6 @@ const Dashboard = () => {
   });
   const [chartData] = useState(sampleActivityData);
   const [selectedTimeRange, setSelectedTimeRange] = useState('week');
-
-  const handleLogout = () => {
-    // Static navigation without backend call
-    navigate('/', { replace: true });
-  };
-
   return (
     <div className="py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -244,7 +238,6 @@ const Dashboard = () => {
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 className="bg-gray-50 p-4 rounded-lg text-center cursor-pointer"
-                onClick={handleLogout}
               >
                 <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">

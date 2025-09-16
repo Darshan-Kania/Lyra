@@ -6,41 +6,12 @@ import Dashboard from "../pages/Dashboard";
 import EmailsPage from "../pages/EmailsPage";
 import SettingsPage from "../pages/SettingsPage";
 import AppLayout from "../components/common/AppLayout";
-import { isAuthenticated } from "../utils/auth";
-
-// Protected route component
-const ProtectedRoute = ({ children }) => {
-  const [isAuth, setIsAuth] = React.useState(null);
-  
-  React.useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const authStatus = await isAuthenticated();
-        setIsAuth(authStatus);
-      } catch (error) {
-        console.error("Error checking authentication:", error);
-        setIsAuth(false);
-      }
-    };
-    
-    checkAuth();
-  }, []);
-  
-  // Show nothing while checking (prevents flash)
-  if (isAuth === null) {
-    return <div className="min-h-screen bg-gray-50" />;
-  }
-  
-  return isAuth ? children : <Navigate to="/" replace />;
-};
-
-// Layout wrapper for protected routes
-const ProtectedPageWithLayout = ({ element }) => (
-  <ProtectedRoute>
-    <AppLayout>
-      {element}
-    </AppLayout>
-  </ProtectedRoute>
+import { isAuthenticated } from "../utils/auth.js";
+// Layout wrapper for all pages (no protection)
+const PageWithLayout = ({ element }) => (
+  <AppLayout>
+    {element}
+  </AppLayout>
 );
 
 const AppRouter = () => (
@@ -50,15 +21,15 @@ const AppRouter = () => (
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route 
         path="/dashboard" 
-        element={<ProtectedPageWithLayout element={<Dashboard />} />} 
+        element={<PageWithLayout element={<Dashboard />} />} 
       />
       <Route 
         path="/emails" 
-        element={<ProtectedPageWithLayout element={<EmailsPage />} />} 
+        element={<PageWithLayout element={<EmailsPage />} />} 
       />
       <Route 
         path="/settings" 
-        element={<ProtectedPageWithLayout element={<SettingsPage />} />} 
+        element={<PageWithLayout element={<SettingsPage />} />} 
       />
       {/* Add a catch-all route that redirects to home */}
       <Route path="*" element={<Navigate to="/" replace />} />

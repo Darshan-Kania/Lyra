@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim";
 import { Footer } from "../components/common/Footer";
-import { initiateGoogleLogin, isAuthenticated } from "../utils/auth";
+import { initiateGoogleLogin } from "../utils/auth.js";
 import { useNavigate } from "react-router-dom";
 
 // --- Icon Components (inlined to avoid extra dependencies) ---

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { logout } from '../../utils/auth';
+import axios from 'axios';
+import { a } from 'framer-motion/client';
 
 const AppLayout = ({ children }) => {
   const navigate = useNavigate();
@@ -12,12 +13,23 @@ const AppLayout = ({ children }) => {
   const isActive = (path) => {
     return location.pathname === path;
   };
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-  const handleLogout = () => {
-    // Static logout without waiting for backend
-    logout();
-    navigate('/', { replace: true });
-  };
+const handleLogout = async () => {
+  console.log('Logging out...');
+
+  try {
+    await axios.patch(`${BACKEND_URL}/auth/logout`, {}, {
+      withCredentials: true  // ✅ This is crucial for cookies
+    });
+
+    console.log('Logged out successfully on server');
+  } catch (error) {
+    console.error('Error logging out:', error);
+    // Proceed anyway
+  }
+  navigate('/', { replace: true });  // Redirect to home
+};
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
