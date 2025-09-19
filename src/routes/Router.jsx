@@ -6,8 +6,6 @@ import Dashboard from "../pages/Dashboard";
 import EmailsPage from "../pages/EmailsPage";
 import SettingsPage from "../pages/SettingsPage";
 import AppLayout from "../components/common/AppLayout";
-import { isAuthenticated } from "../utils/auth.js";
-// Layout wrapper for all pages (no protection)
 const PageWithLayout = ({ element }) => (
   <AppLayout>
     {element}

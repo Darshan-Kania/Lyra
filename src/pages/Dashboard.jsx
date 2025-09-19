@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -16,23 +17,71 @@ const sampleActivityData = [
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [user] = useState({
-    name: "John Doe",
-    email: "johndoe@example.com"
+  const [user, setUser] = useState(null);
+  const [stats, setStats] = useState({
+    totalEmails: 0,
+    unreadEmails: 0,
+    importantEmails: 0,
+    todaysEmails: 0
   });
-  const [stats] = useState({
-    totalEmails: 142,
-    unreadEmails: 7,
-    importantEmails: 24
-  });
-  const [chartData] = useState(sampleActivityData);
+  const [chartData, setChartData] = useState(sampleActivityData);
   const [selectedTimeRange, setSelectedTimeRange] = useState('week');
+  const [topContacts, setTopContacts] = useState([]);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+      // Fetch user info
+      await axios.get(`${BACKEND_URL}/dashboard/userProfile`, { withCredentials: true })
+        .then(res => {
+          // Accept both {success: true, data: {...}} and direct user object
+          const userData = res.data && res.data.data ? res.data.data : res.data;
+          setUser(userData);
+        })
+        .catch(() => setUser(null));
+      // Fetch total email count
+      await axios.get(`${BACKEND_URL}/dashboard/EmailCount`, { withCredentials: true })
+        .then(res => setStats(prev => ({ ...prev, totalEmails: res.data.count ?? 0 })))
+        .catch(() => {});
+
+      // Fetch unread email count
+      await axios.get(`${BACKEND_URL}/dashboard/EmailCount?label=unread`, { withCredentials: true })
+        .then(res => setStats(prev => ({ ...prev, unreadEmails: res.data.count ?? 0 })))
+        .catch(() => {});
+
+      // Fetch today's email count
+      await axios.get(`${BACKEND_URL}/dashboard/EmailCount?label=today`, { withCredentials: true })
+        .then(res => setStats(prev => ({ ...prev, todaysEmails: res.data.count ?? 0 })))
+        .catch(() => {});
+
+      // Fetch top contacts
+      await axios.get(`${BACKEND_URL}/user/topContacts`, { withCredentials: true })
+        .then(res => setTopContacts(res.data.contacts || []))
+        .catch(() => setTopContacts([]));
+
+      // Optionally: fetch chart/activity data from backend if available
+      // await axios.get(`${BACKEND_URL}/dashboard/activity`, { withCredentials: true })
+      //   .then(res => setChartData(res.data.activity || sampleActivityData))
+      //   .catch(() => {});
+    };
+    fetchDashboardData();
+  }, []);
+  useEffect(() => {
+  }, [user]);
+
   return (
     <div className="py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Welcome back{user ? `, ${user.name || user.email?.split('@')[0]}` : ''}!</h1>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Welcome back
+              {user && (user.name
+                ? `, ${user.name}`
+                : user.email
+                  ? `, ${user.email.split('@')[0]}`
+                  : '')}!
+            </h1>
             <p className="mt-1 text-sm text-gray-600">Here's an overview of your email activity</p>
           </div>
           
@@ -52,7 +101,27 @@ const Dashboard = () => {
         </div>
         
         {/* Stats cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+  <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          {/* Today's emails */}
+          <motion.div 
+            whileHover={{ y: -5 }}
+            className="bg-white shadow-sm rounded-xl p-6 border border-gray-100"
+          >
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm text-gray-500 font-medium">Today's Emails</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">{stats.todaysEmails}</p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+            <div className="mt-3 flex items-center">
+              <span className="text-sm text-gray-600">Received today</span>
+            </div>
+          </motion.div>
           {/* Total emails */}
           <motion.div 
             whileHover={{ y: -5 }}
@@ -257,15 +326,10 @@ const Dashboard = () => {
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { name: 'Alex Johnson', email: 'alex@example.com', count: 23 },
-                { name: 'Maria Garcia', email: 'maria@company.com', count: 19 },
-                { name: 'James Smith', email: 'james@organization.com', count: 15 },
-                { name: 'Lisa Wang', email: 'lisa@startup.co', count: 12 }
-              ].map((contact, index) => (
+              {topContacts.map((contact, index) => (
                 <div key={index} className="p-4 border border-gray-100 rounded-lg">
                   <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <span className="text-indigo-700 font-semibold">{contact.name[0]}</span>
+                    <span className="text-indigo-700 font-semibold">{contact.name ? contact.name[0] : '?'}</span>
                   </div>
                   <div className="text-center">
                     <p className="font-medium">{contact.name}</p>
@@ -274,54 +338,6 @@ const Dashboard = () => {
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
-        </div>
-        
-        {/* Activity summary */}
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <h2 className="text-lg font-semibold mb-4">Recent Activity</h2>
-          <div className="space-y-4">
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l-4-4m4 4l4-4" />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium">You received 5 new emails today</p>
-                <p className="text-xs text-gray-500 mt-1">2 hours ago</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium">You marked all emails as read</p>
-                <p className="text-xs text-gray-500 mt-1">Yesterday</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium">You snoozed 3 emails</p>
-                <p className="text-xs text-gray-500 mt-1">2 days ago</p>
-              </div>
             </div>
           </div>
         </div>

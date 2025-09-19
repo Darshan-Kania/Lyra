@@ -2,10 +2,10 @@ import React, { useEffect } from "react";
 import Confetti from "react-confetti";
 import { motion } from "framer-motion";
 import Particles from "react-tsparticles";
-import { loadSlim } from "tsparticles-slim";
-import { Footer } from "../components/common/Footer";
-import { initiateGoogleLogin, isAuthenticated } from "../utils/auth.js";
-import { useNavigate } from "react-router-dom";
+import { loadSlim } from "tsparticles-slim"; // Use loadSlim for smaller bundle
+import { Footer } from "../components/common/Footer"; // Assuming this path is correct
+import { initiateGoogleLogin, isAuthenticated } from "../utils/auth.js"; // Assuming this path is correct
+import { useNavigate, useLocation } from "react-router-dom"; // Moved useLocation here
 
 // --- Icon Components (inlined to avoid extra dependencies) ---
 const MailIcon = ({ className }) => (
@@ -109,14 +109,13 @@ const features = [
 ];
 
 // --- Main Landing Page Component ---
-import { useLocation } from "react-router-dom";
-
 const LandingPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [buttonShow, setButtonShow] = React.useState({ func: initiateGoogleLogin, msg: "Login with Google" });
   const [showSuccess, setShowSuccess] = React.useState(false);
   const [showError, setShowError] = React.useState(false);
+
   useEffect(() => {
     const checkAuth = async () => {
       const isAuth = await isAuthenticated();
@@ -141,6 +140,7 @@ const LandingPage = () => {
       navigate("/", { replace: true });
     }
   }, [location, navigate]);
+
   // --- Particle Background Initialization ---
   const particlesInit = React.useCallback(async (engine) => {
     await loadSlim(engine);
@@ -237,9 +237,6 @@ const LandingPage = () => {
     },
   };
 
-  // NOTE: To use this component, you'll need to install the following packages:
-  // npm install react-tsparticles tsparticles-slim framer-motion
-
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 font-sans antialiased relative overflow-hidden">
       {showSuccess && (
@@ -267,14 +264,20 @@ const LandingPage = () => {
         {/* Header */}
         <header className="py-6 px-4 sm:px-6 lg:px-8">
           <div className="container mx-auto flex justify-between items-center">
+            {/* Corrected Logo and Text for MailFlare */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
-              className="text-2xl font-bold tracking-wider text-gray-900"
+              className="flex items-center gap-2" // Added flex for logo and text
             >
-              MailFlare
+              <span className="text-2xl font-bold tracking-wider text-gray-900">
+                <span style={{ color: '#28468E' }}>Mail</span>
+                <span style={{ color: '#E83E8C' }}>Flare</span>
+              </span>
             </motion.div>
+            {/* End Corrected Logo and Text */}
+
             <motion.button
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
