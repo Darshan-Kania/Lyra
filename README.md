@@ -4,7 +4,7 @@ A modern, modular React email client built with Vite, Zustand for state manageme
 
 ## 🏗️ Project Structure
 
-```
+````
 src/
 ├── api/                    # API abstraction layer
 │   ├── client.js          # Axios client configuration
@@ -27,164 +27,45 @@ src/
 │   │   ├── ActivityChart.jsx
 │   │   ├── QuickActions.jsx
 │   │   ├── TopContacts.jsx
+# MailFlare
 │   │   └── index.js
 │   ├── emails/            # Email-specific components
 │   │   ├── EmailsHeader.jsx
-│   │   ├── EmailList.jsx
-│   │   ├── EmailContent.jsx
-│   │   └── index.js
-│   ├── settings/          # Settings components (future)
-│   └── auth/              # Auth components (future)
-├── pages/                 # Page components
-│   ├── LandingPage.jsx    # Landing/login page
-│   ├── Dashboard.jsx      # Main dashboard
-│   ├── EmailsPage.jsx     # Email management
-│   ├── SettingsPage.jsx   # User settings
-│   └── AuthCallback.jsx   # OAuth callback
-├── hooks/                 # Custom React hooks
-│   ├── useStores.js       # Store convenience hooks
-│   └── index.js
-├── routes/                # Routing configuration
-│   └── Router.jsx
-├── utils/                 # Utility functions
-│   └── auth.js           # Legacy auth utils (deprecated)
-└── assets/               # Static assets
-```
+# MailFlare
 
-## 🔧 Technologies Used
+Modern React email client with AI‑assisted workflows.
 
-- **React 19** - UI framework
-- **Vite** - Build tool and dev server
-- **Zustand** - Lightweight state management
-- **React Router** - Client-side routing
-- **Axios** - HTTP client
-- **Framer Motion** - Animations
-- **Tailwind CSS** - Styling
-- **Recharts** - Data visualization
+## Features
+- Inbox list view (full‑width) with familiar email browsing
+- Full‑screen email detail route with clean reading experience
+- AI summary of each email’s content
+- Three AI quick‑reply suggestions with Send action
+- Global loading overlay for a smooth, consistent feel
+- Sidebar toggle on smaller screens
+- Pagination and basic importance/read states
+- Graceful fallback data when backend is unavailable
 
-## 🚀 Key Features
-
-### Modular Architecture
-- **Component Separation**: Each major feature has its own component directory
-- **API Abstraction**: Centralized API logic with error handling and caching
-- **State Management**: Zustand stores for different domains (auth, dashboard, emails)
-- **Custom Hooks**: Convenience hooks for common store operations
-
-### State Management with Zustand
-
-#### Auth Store (`useAuthStore`)
-```javascript
-import { useAuthStore } from '../store';
-
-const { 
-  isAuthenticated, 
-  user, 
-  login, 
-  logout, 
-  checkAuthStatus 
-} = useAuthStore();
-```
-
-#### Dashboard Store (`useDashboardStore`)
-```javascript
-import { useDashboardStore } from '../store';
-
-const { 
-  stats, 
-  topContacts, 
-  activityData, 
-  fetchStats, 
-  fetchActivityData 
-} = useDashboardStore();
-```
-
-#### Emails Store (`useEmailSelectors`)
-```javascript
-import { useEmailSelectors } from '../store/emailsStore';
-
-const { 
-  paginatedEmails, 
-  selectedEmail, 
-  unreadCount,
-  fetchEmails, 
-  selectEmail 
-} = useEmailSelectors();
-```
-
-### API Layer Benefits
-- **Centralized Configuration**: Single axios instance with interceptors
-- **Error Handling**: Consistent error handling across all API calls
-- **Caching**: Built-in caching to reduce redundant API calls
-- **Fallback Data**: Graceful fallbacks when APIs are unavailable
-
-### Component Benefits
-- **Reusable**: Components can be easily reused across different pages
-- **Testable**: Isolated components are easier to unit test
-- **Maintainable**: Changes to UI logic are contained within specific components
-- **Props Interface**: Clear interfaces between parent and child components
-
-## 🔄 Data Flow
-
-1. **Pages** use stores to get data and trigger actions
-2. **Stores** call API methods to fetch/update data
-3. **API methods** handle HTTP requests with proper error handling
+## Libraries (what we used and where)
+- React + Vite — application UI and fast dev/build tooling
+- React Router — navigation (list: /emails, detail: /emails/:id)
+- Zustand — app state (auth, dashboard, emails, ui)
+- Axios — HTTP client with interceptors (centralized headers, global loader)
+- Tailwind CSS — styling system for rapid, consistent UI
+- Framer Motion — micro‑interactions and subtle animations
+- Recharts — dashboard charts and visualizations
+- @fontsource/inter — typography (Inter font)
+- classnames — conditional class management
+- js-cookie — lightweight cookie utilities for auth/session needs
 4. **Components** receive data via props and emit events via callbacks
 
 ## 🧪 Development
 
 ### Getting Started
+
 ```bash
 npm install
 npm run dev
-```
-
-### Store Usage Examples
-
-#### Authentication
-```javascript
-// In a component
-const { user, login, logout } = useAuth(); // Custom hook
-
-// Login
-const handleLogin = () => {
-  login(); // Redirects to Google OAuth
-};
-
-// Logout
-const handleLogout = async () => {
-  const result = await logout();
-  if (result.success) {
-    navigate('/');
-  }
-};
-```
-
-#### Dashboard Data
-```javascript
-const { stats, refreshAll } = useDashboard(); // Custom hook
-
-// Refresh all dashboard data
-useEffect(() => {
-  refreshAll();
-}, []);
-
-// Display stats
-return <DashboardStats stats={stats} />;
-```
-
-#### Email Management
-```javascript
-const { 
-  paginatedEmails, 
-  selectedEmail, 
-  selectEmail 
-} = useEmails(); // Custom hook
-
-// Select an email
-const handleEmailSelect = (emailId) => {
-  selectEmail(emailId); // Automatically marks as read
-};
-```
+````
 
 ## 📦 Building for Production
 
@@ -196,7 +77,7 @@ npm run preview
 ## 🚧 Future Improvements
 
 1. **Add TypeScript** for better type safety
-2. **Email Compose** functionality 
+2. **Email Compose** functionality
 3. **Real-time Updates** with WebSocket integration
 4. **Email Search** and advanced filtering
 5. **Offline Support** with service workers
@@ -212,9 +93,10 @@ The application is designed to work with a backend API. Set your backend URL in 
 VITE_BACKEND_URL=http://localhost:3001
 ```
 
-Expected API endpoints:
+API endpoints from backend:
+
 - `GET /auth/status` - Check authentication
-- `GET /dashboard/userProfile` - Get user info  
+- `GET /dashboard/userProfile` - Get user info
 - `GET /dashboard/EmailCount` - Get email counts
 - `GET /user/topContacts` - Get frequent contacts
 - `POST /auth/logout` - Logout user
