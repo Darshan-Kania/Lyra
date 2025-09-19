@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuthStore } from "../../store";
+import GlobalLoader from "./GlobalLoader";
 
 const AppLayout = ({ children }) => {
   const navigate = useNavigate();
@@ -38,6 +39,7 @@ const AppLayout = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+  <GlobalLoader />
       {/* Navbar */}
       <header className="bg-white shadow-sm">
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">

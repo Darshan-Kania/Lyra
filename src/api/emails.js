@@ -1,6 +1,20 @@
 // Emails API methods
 import apiClient from './client.js';
 
+// Helper function to normalize AI replies from various backend fields
+const normalizeAiReplies = (email) => {
+  const replies =
+    email.aiReplies ||
+    email.suggestedReplies ||
+    email.smartReplies ||
+    email.ai_replies ||
+    email.replies ||
+    [];
+  if (!Array.isArray(replies)) return [];
+  // Trim to first 3 concise suggestions
+  return replies.filter(Boolean).slice(0, 3);
+};
+
 // Helper function to transform backend email data to frontend format
 const transformEmailData = (backendEmails) => {
   return backendEmails.map(email => ({
@@ -13,7 +27,8 @@ const transformEmailData = (backendEmails) => {
     read: email.read || false,
     important: email.important || false,
     gmailMessageId: email.gmailMessageId,
-    summary: email.summary || null
+    summary: email.summary || null,
+    aiReplies: normalizeAiReplies(email)
   }));
 };
 
@@ -41,15 +56,23 @@ const generateSampleEmails = () => {
   for (let i = 6; i <= 25; i++) {
     const template = additionalTemplates[(i - 6) % additionalTemplates.length];
     const date = new Date(new Date().setDate(new Date().getDate() - (i - 1)));
+    const subject = `${template.subject} #${i-5}`;
+    const body = `${template.body} (Ref: ${Math.random().toString(36).substring(7)})`;
     allEmails.push({
       id: i.toString(),
       sender: template.sender,
       senderEmail: `${template.sender.toLowerCase().replace(' ', '')}@example.com`,
-      subject: `${template.subject} #${i-5}`,
-      body: `${template.body} (Ref: ${Math.random().toString(36).substring(7)})`,
+      subject,
+      body,
       date: date.toISOString(),
       read: i % 3 === 0,
       important: i % 7 === 0,
+      summary: `Summary: ${body.slice(0, 80)}...`,
+      aiReplies: [
+        `Thanks for the update! Could you share more details on ${template.sender === 'Design Team' ? 'the mockups' : 'this'}?`,
+        'Looks good to me. Approved.',
+        'Let’s schedule a quick call to discuss next steps.'
+      ]
     });
   }
   return allEmails.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -137,7 +160,7 @@ export const emailsAPI = {
       
       if (response.data.success) {
         const email = response.data.data;
-        return {
+    return {
           success: true,
           email: {
             id: email._id,
@@ -149,7 +172,8 @@ export const emailsAPI = {
             read: email.read || false,
             important: email.important || false,
             gmailMessageId: email.gmailMessageId,
-            summary: email.summary || null
+      summary: email.summary || null,
+      aiReplies: normalizeAiReplies(email)
           }
         };
       } else {
@@ -166,6 +190,20 @@ export const emailsAPI = {
         email: email || null,
         error: error.message
       };
+    }
+  },
+
+  // Send a reply (uses backend endpoint if available)
+  sendReply: async (emailId, message) => {
+    try {
+      const response = await apiClient.post(`/emails/${emailId}/reply`, { body: message });
+      return {
+        success: response.data?.success !== false,
+        data: response.data
+      };
+    } catch (error) {
+      console.warn(`Send reply failed for email ${emailId}:`, error.message);
+      return { success: false, error: error.message };
     }
   }
 };

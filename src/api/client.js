@@ -1,5 +1,6 @@
 // API Client Configuration
 import axios from 'axios';
+import { inc as incLoad, dec as decLoad } from '../utils/loadingBus';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -17,9 +18,11 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     // Add any auth tokens or common headers here
+  incLoad();
     return config;
   },
   (error) => {
+  decLoad();
     return Promise.reject(error);
   }
 );
@@ -27,6 +30,7 @@ apiClient.interceptors.request.use(
 // Response interceptor
 apiClient.interceptors.response.use(
   (response) => {
+  decLoad();
     return response;
   },
   (error) => {
@@ -35,6 +39,7 @@ apiClient.interceptors.response.use(
       // Handle unauthorized access
       console.log('Unauthorized access - redirect to login');
     }
+  decLoad();
     return Promise.reject(error);
   }
 );

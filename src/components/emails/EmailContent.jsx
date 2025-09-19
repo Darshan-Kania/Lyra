@@ -1,8 +1,22 @@
 // Email Content Display Component
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { emailsAPI } from '../../api';
 
 const EmailContent = ({ selectedEmail, isLoading }) => {
+  // Log the full selected email object whenever it changes for debugging
+  useEffect(() => {
+    if (selectedEmail) {
+      console.log('[EmailContent] Selected Email:', selectedEmail);
+    } else {
+      console.log('[EmailContent] No email selected');
+    }
+  }, [selectedEmail]);
+
+  // Hooks must be called unconditionally and in the same order
+  const [sendingId, setSendingId] = useState(null);
+  const [sendError, setSendError] = useState(null);
+
   if (isLoading) {
     return (
       <div className="flex-grow bg-white p-8 overflow-y-auto flex items-center justify-center">
@@ -33,6 +47,17 @@ const EmailContent = ({ selectedEmail, isLoading }) => {
       hour: 'numeric',
       minute: '2-digit'
     });
+  };
+
+  const handleSend = async (text) => {
+    if (!selectedEmail?.id || !text) return;
+    setSendError(null);
+    setSendingId(text);
+    const res = await emailsAPI.sendReply(selectedEmail.id, text);
+    if (!res.success) {
+      setSendError('Failed to send. Please try again.');
+    }
+    setSendingId(null);
   };
 
   return (
@@ -72,9 +97,6 @@ const EmailContent = ({ selectedEmail, isLoading }) => {
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">{selectedEmail.sender}</p>
-                  <p className="text-sm text-gray-500">
-                    to me &lt;{selectedEmail.senderEmail}&gt;
-                  </p>
                 </div>
               </div>
               
@@ -90,7 +112,44 @@ const EmailContent = ({ selectedEmail, isLoading }) => {
               {selectedEmail.body}
             </div>
           </div>
+
+          {/* Summarized Content */}
+          {selectedEmail.summary && (
+            <div className="mt-6 p-4 border border-indigo-200 bg-indigo-50 rounded-lg">
+              <div className="flex items-center mb-2 text-indigo-700 font-semibold">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h8m-8 4h5M7 8h10a2 2 0 012 2v8a2 2 0 01-2 2H7a2 2 0 01-2-2V10a2 2 0 012-2z" />
+                </svg>
+                Summarized Content
+              </div>
+              <p className="text-sm text-indigo-900 whitespace-pre-wrap">{selectedEmail.summary}</p>
+            </div>
+          )}
           
+          {/* AI Replies */}
+          {Array.isArray(selectedEmail.aiReplies) && selectedEmail.aiReplies.length > 0 && (
+            <div className="mt-6">
+              <div className="mb-3 text-sm font-semibold text-gray-700">Quick AI Replies</div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {selectedEmail.aiReplies.slice(0,3).map((reply, idx) => (
+                  <div key={idx} className="p-3 border rounded-md bg-gray-50 flex flex-col">
+                    <p className="text-sm text-gray-800 flex-1">{reply}</p>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => handleSend(reply)}
+                      disabled={sendingId === reply}
+                      className="mt-3 inline-flex items-center justify-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60"
+                    >
+                      {sendingId === reply ? 'Sending…' : 'Send'}
+                    </motion.button>
+                  </div>
+                ))}
+              </div>
+              {sendError && <p className="mt-2 text-sm text-red-600">{sendError}</p>}
+            </div>
+          )}
+
           {/* Email Actions */}
           <div className="mt-8 pt-6 border-t border-gray-200">
             <div className="flex items-center space-x-4">

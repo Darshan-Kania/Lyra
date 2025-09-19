@@ -116,18 +116,19 @@ const EmailList = ({
   currentPage, 
   totalPages, 
   onPageChange,
-  isLoading 
+  isLoading,
+  fullWidth = false
 }) => {
   if (isLoading) {
     return (
-      <div className="w-96 bg-white border-r border-gray-200 flex items-center justify-center">
+      <div className={`${fullWidth ? 'flex-1 w-full' : 'w-96'} bg-white ${fullWidth ? '' : 'border-r border-gray-200'} flex items-center justify-center`}>
         <div className="text-gray-500">Loading emails...</div>
       </div>
     );
   }
 
   return (
-    <div className="w-96 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
+    <div className={`${fullWidth ? 'flex-1 w-full' : 'w-96'} bg-white ${fullWidth ? '' : 'border-r border-gray-200'} flex flex-col ${fullWidth ? '' : 'flex-shrink-0'}`}>
       <div className="flex-grow overflow-y-auto">
         {emails.map(email => (
           <EmailItem 

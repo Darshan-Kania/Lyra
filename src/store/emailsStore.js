@@ -41,10 +41,21 @@ const useEmailsStore = create(
         lastFetched: now
       });
 
-      // Auto-select first email if none selected
-      const { emails, selectedEmailId } = get();
-      if (emails.length > 0 && !selectedEmailId) {
-        set({ selectedEmailId: emails[0].id });
+  // Hydrate selected email with full details (summary, AI replies) if one is already selected (e.g., persisted)
+  const { selectedEmailId: idToHydrate } = get();
+  if (idToHydrate) {
+        try {
+          const detailRes = await emailsAPI.getEmailById(idToHydrate);
+          if (detailRes && detailRes.email) {
+            set(state => ({
+              emails: state.emails.map(e =>
+                e.id === idToHydrate ? { ...e, ...detailRes.email } : e
+              )
+            }));
+          }
+        } catch (e) {
+          console.warn('Failed to hydrate selected email:', e.message);
+        }
       }
 
     } catch (error) {
@@ -82,6 +93,20 @@ const useEmailsStore = create(
           )
         }));
       }
+    }
+
+    // Fetch full email details (summary, AI replies, etc.) when selected
+    try {
+      const res = await emailsAPI.getEmailById(emailId);
+      if (res && res.email) {
+        set(state => ({
+          emails: state.emails.map(e => 
+            e.id === emailId ? { ...e, ...res.email } : e
+          )
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to fetch email details:', error);
     }
   },
 
@@ -146,9 +171,10 @@ const useEmailsStore = create(
   storage: createJSONStorage(() => localStorage),
   // Only persist user preferences, not the actual emails or loading states
   partialize: (state) => ({ 
-    selectedCategory: state.selectedCategory,
-    currentPage: state.currentPage,
-    itemsPerPage: state.itemsPerPage
+  selectedCategory: state.selectedCategory,
+  currentPage: state.currentPage,
+  itemsPerPage: state.itemsPerPage,
+  selectedEmailId: state.selectedEmailId
   }),
 }
 )

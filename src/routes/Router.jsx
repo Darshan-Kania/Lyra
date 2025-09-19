@@ -5,6 +5,7 @@ import AuthCallback from "../pages/AuthCallback";
 import Dashboard from "../pages/Dashboard";
 import EmailsPage from "../pages/EmailsPage";
 import SettingsPage from "../pages/SettingsPage";
+import EmailDetailPage from "../pages/EmailDetailPage";
 import AppLayout from "../components/common/AppLayout";
 const PageWithLayout = ({ element }) => (
   <AppLayout>
@@ -24,6 +25,10 @@ const AppRouter = () => (
       <Route 
         path="/emails" 
         element={<PageWithLayout element={<EmailsPage />} />} 
+      />
+      <Route 
+        path="/emails/:id" 
+        element={<PageWithLayout element={<EmailDetailPage />} />} 
       />
       <Route 
         path="/settings" 

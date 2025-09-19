@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useEmailSelectors } from '../store/emailsStore';
@@ -11,6 +11,8 @@ import {
 
 const EmailsPage = () => {
   const navigate = useNavigate();
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [focusEmailView, setFocusEmailView] = useState(false);
   
   // Zustand email store with selectors
   const {
@@ -35,7 +37,8 @@ const EmailsPage = () => {
   }, [fetchEmails]);
 
   const handleSelectEmail = (emailId) => {
-    selectEmail(emailId);
+    // navigate to detail route; EmailDetailPage will select and fetch
+    navigate(`/emails/${emailId}`);
   };
 
   const handleCategoryChange = (category) => {
@@ -47,7 +50,11 @@ const EmailsPage = () => {
   };
 
   const handleGoBack = () => {
-    navigate(-1);
+    if (focusEmailView) {
+      setFocusEmailView(false); // exit full email view to list
+    } else {
+      navigate(-1);
+    }
   };
 
   // Loading state
@@ -94,13 +101,27 @@ const EmailsPage = () => {
       />
       
       <main className="flex-grow flex min-h-0">
-        <EmailSidebar 
-          selectedCategory={selectedCategory}
-          onCategoryChange={handleCategoryChange}
-          unreadCount={unreadCount}
-          isLoading={isLoading}
-        />
-        
+        {/* Sidebar toggle button for small screens */}
+        <div className="absolute top-24 left-4 z-10 md:hidden">
+          <button
+            onClick={() => setShowSidebar(s => !s)}
+            className="px-3 py-1.5 text-sm rounded-md bg-white border border-gray-300 shadow"
+          >
+            {showSidebar ? 'Hide menu' : 'Show menu'}
+          </button>
+        </div>
+
+        {/* Left Sidebar (toggleable) */}
+        {showSidebar && (
+          <EmailSidebar 
+            selectedCategory={selectedCategory}
+            onCategoryChange={handleCategoryChange}
+            unreadCount={unreadCount}
+            isLoading={isLoading}
+          />
+        )}
+
+        {/* List-only view here; detail is a separate route */}
         <EmailList 
           emails={paginatedEmails}
           selectedEmailId={selectedEmailId}
@@ -109,11 +130,7 @@ const EmailsPage = () => {
           totalPages={totalPages}
           onPageChange={handlePageChange}
           isLoading={isLoading}
-        />
-        
-        <EmailContent 
-          selectedEmail={selectedEmail}
-          isLoading={isLoading}
+          fullWidth
         />
       </main>
     </div>
