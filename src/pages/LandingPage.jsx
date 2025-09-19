@@ -4,8 +4,8 @@ import { motion } from "framer-motion";
 import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim"; // Use loadSlim for smaller bundle
 import { Footer } from "../components/common/Footer"; // Assuming this path is correct
-import { initiateGoogleLogin, isAuthenticated } from "../utils/auth.js"; // Assuming this path is correct
-import { useNavigate, useLocation } from "react-router-dom"; // Moved useLocation here
+import { useAuthStore } from "../store";
+import { useNavigate, useLocation } from "react-router-dom";
 
 // --- Icon Components (inlined to avoid extra dependencies) ---
 const MailIcon = ({ className }) => (
@@ -112,19 +112,26 @@ const features = [
 const LandingPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [buttonShow, setButtonShow] = React.useState({ func: initiateGoogleLogin, msg: "Login with Google" });
+  
+  // Auth store
+  const { isAuthenticated, checkAuthStatus, initiateGoogleLogin } = useAuthStore();
+  
+  const [buttonShow, setButtonShow] = React.useState({ 
+    func: initiateGoogleLogin, 
+    msg: "Login with Google" 
+  });
   const [showSuccess, setShowSuccess] = React.useState(false);
   const [showError, setShowError] = React.useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
-      const isAuth = await isAuthenticated();
+      const isAuth = await checkAuthStatus();
       if (isAuth) {
         setButtonShow({ func: () => navigate("/dashboard"), msg: "Go to Dashboard" });
       }
     };
     checkAuth();
-  }, [navigate]);
+  }, [navigate, checkAuthStatus]);
 
   // Show popup if redirected from AuthCallback
   useEffect(() => {
@@ -326,12 +333,6 @@ const LandingPage = () => {
               MailFlare uses cutting-edge AI to clean up your inbox, write
               replies for you, and give you back hours of your day.
             </motion.p>
-
-            <motion.div variants={itemVariants}>
-              <button className="px-8 py-3 bg-indigo-600 text-white rounded-lg font-semibold shadow-lg hover:bg-indigo-700 transition-colors duration-300 transform hover:scale-105">
-                Get Started for Free
-              </button>
-            </motion.div>
           </motion.section>
 
           {/* Features Section */}

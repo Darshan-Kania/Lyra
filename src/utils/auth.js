@@ -1,22 +1,22 @@
 // UI-only auth utility stubs. No backend/API calls.
+// This file is now deprecated - use useAuthStore instead
 
-import axios from "axios";
+import { authAPI } from "../api";
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+// Backward compatibility functions - these now use the API abstraction
 export const isAuthenticated = async () => {
-  const res= await axios.get(`${BACKEND_URL}/auth/status`, { withCredentials: true });
-  if(res.status===200&&res.data.authenticated === true){
-    return true;
-  }
-  return false;
+  const result = await authAPI.checkAuthStatus();
+  return result.isAuthenticated;
 };
 
 export const initiateGoogleLogin = () => {
-  window.location.href = `${BACKEND_URL}/auth/google`;
+  authAPI.initiateGoogleLogin();
 };
-
 
 export const getCurrentUser = async () => {
-  // Returns null (UI only)
-  return null;
+  const result = await authAPI.getCurrentUser();
+  return result.success ? result.user : null;
 };
+
+// Note: These functions are deprecated. 
+// Use useAuthStore hook for better state management:

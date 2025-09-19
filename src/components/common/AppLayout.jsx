@@ -1,38 +1,39 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import axios from "axios";
-import { a } from "framer-motion/client";
+import { useAuthStore } from "../../store";
 
 const AppLayout = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  // Use auth store
+  const { logout } = useAuthStore();
 
   // Determine active link
   const isActive = (path) => {
     return location.pathname === path;
   };
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   const handleLogout = async () => {
     console.log("Logging out...");
-
+    
     try {
-      await axios.patch(
-        `${BACKEND_URL}/auth/logout`,
-        {},
-        {
-          withCredentials: true,
-        }
-      );
-
-      console.log("Logged out successfully on server");
+      const result = await logout();
+      if (result.success) {
+        console.log("Logged out successfully");
+        navigate("/", { replace: true });
+      } else {
+        console.error("Logout failed:", result.error);
+        // Still redirect to home page
+        navigate("/", { replace: true });
+      }
     } catch (error) {
-      console.error("Error logging out:", error);
-      // Proceed anyway
+      console.error("Error during logout:", error);
+      // Still redirect to home page
+      navigate("/", { replace: true });
     }
-    navigate("/", { replace: true }); // Redirect to home
   };
 
   return (
