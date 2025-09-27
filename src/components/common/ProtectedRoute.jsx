@@ -8,18 +8,25 @@ const ProtectedRoute = ({ children }) => {
   const hasInitialized = useRef(false);
 
   useEffect(() => {
+    let isMounted = true;
+    
     // Only run auth check once when component mounts
     const initAuth = async () => {
-      if (!hasInitialized.current && !isAuthenticated && !isLoading) {
+      if (!hasInitialized.current && !isAuthenticated && !isLoading && isMounted) {
         hasInitialized.current = true;
         const isAuth = await checkAuthStatus();
-        if (isAuth) {
+        if (isAuth && isMounted) {
           await fetchUser();
         }
       }
     };
     
     initAuth();
+    
+    // Cleanup function to prevent state updates if component unmounts
+    return () => {
+      isMounted = false;
+    };
   }, []); // Empty dependency array - only run once on mount
 
   // Show loading while checking authentication
@@ -36,7 +43,7 @@ const ProtectedRoute = ({ children }) => {
 
   // Redirect to landing page if not authenticated
   if (!isAuthenticated) {
-    return <Navigate to="/" state={{ from: location }} replace />;
+    return <Navigate to="/?auth=required" state={{ from: location }} replace />;
   }
 
   // Render protected content if authenticated

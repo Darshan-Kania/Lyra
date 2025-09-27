@@ -122,6 +122,7 @@ const LandingPage = () => {
   });
   const [showSuccess, setShowSuccess] = React.useState(false);
   const [showError, setShowError] = React.useState(false);
+  const [showLoginRequired, setShowLoginRequired] = React.useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -134,7 +135,7 @@ const LandingPage = () => {
     checkAuth();
   }, [navigate, checkAuthStatus]);
 
-  // Show popup if redirected from AuthCallback
+  // Show popup if redirected from AuthCallback or ProtectedRoute
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const auth = params.get("auth");
@@ -145,6 +146,10 @@ const LandingPage = () => {
     } else if (auth === "failed") {
       setShowError(true);
       setTimeout(() => setShowError(false), 5000);
+      navigate("/", { replace: true });
+    } else if (auth === "required") {
+      setShowLoginRequired(true);
+      setTimeout(() => setShowLoginRequired(false), 4000);
       navigate("/", { replace: true });
     }
   }, [location, navigate]);
@@ -258,6 +263,11 @@ const LandingPage = () => {
       {showError && (
         <div className="fixed top-8 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50">
           Auth failed
+        </div>
+      )}
+      {showLoginRequired && (
+        <div className="fixed top-8 left-1/2 transform -translate-x-1/2 bg-indigo-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 text-lg font-semibold">
+          Please Login First 🙏
         </div>
       )}
       {/* Animated Particle Background */}

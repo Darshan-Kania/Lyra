@@ -28,19 +28,28 @@ const Dashboard = () => {
   } = useDashboardStore();
 
   useEffect(() => {
+    let isMounted = true;
+    
     // Initialize dashboard data only once when component mounts
     const initializeDashboard = async () => {
-      if (!hasInitialized.current) {
+      if (!hasInitialized.current && isMounted) {
         hasInitialized.current = true;
-        if (!user) {
+        if (!user && isMounted) {
           await fetchUser();
         }
-        await fetchStats();
-        await fetchActivityData();
+        if (isMounted) {
+          await fetchStats();
+          await fetchActivityData();
+        }
       }
     };
 
     initializeDashboard();
+    
+    // Cleanup function to prevent API calls if component unmounts
+    return () => {
+      isMounted = false;
+    };
   }, []); // Empty dependency array - only run once on mount
 
   const handleTimeRangeChange = (timeRange) => {

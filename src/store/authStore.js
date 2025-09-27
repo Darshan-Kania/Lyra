@@ -11,10 +11,20 @@ const useAuthStore = create(
       isLoading: false,
       user: null,
       error: null,
+      _activeRequests: new Set(), // Track active API requests
 
       // Actions
       checkAuthStatus: async () => {
+        const { _activeRequests } = get();
+        
+        // Prevent duplicate requests
+        if (_activeRequests.has('checkAuthStatus')) {
+          return get().isAuthenticated;
+        }
+        
+        _activeRequests.add('checkAuthStatus');
         set({ isLoading: true, error: null });
+        
         try {
           const result = await authAPI.checkAuthStatus();
           set({ 
@@ -30,11 +40,27 @@ const useAuthStore = create(
             error: error.message
           });
           return false;
+        } finally {
+          _activeRequests.delete('checkAuthStatus');
         }
       },
 
   fetchUser: async () => {
+    const { _activeRequests, user } = get();
+    
+    // Return cached user if already exists
+    if (user) {
+      return { success: true, user };
+    }
+    
+    // Prevent duplicate requests
+    if (_activeRequests.has('fetchUser')) {
+      return { success: false, error: 'Request in progress' };
+    }
+    
+    _activeRequests.add('fetchUser');
     set({ isLoading: true, error: null });
+    
     try {
       const result = await authAPI.getCurrentUser();
       if (result.success) {
@@ -61,6 +87,8 @@ const useAuthStore = create(
         error: error.message
       });
       return { success: false, error: error.message };
+    } finally {
+      _activeRequests.delete('fetchUser');
     }
   },
 
@@ -102,7 +130,7 @@ const useAuthStore = create(
 {
   name: 'auth-storage', // unique name
   storage: createJSONStorage(() => localStorage),
-  // Only persist essential auth data, not loading states or errors
+  // Only persist essential auth data, not loading states, errors, or active requests
   partialize: (state) => ({ 
     isAuthenticated: state.isAuthenticated,
     user: state.user
