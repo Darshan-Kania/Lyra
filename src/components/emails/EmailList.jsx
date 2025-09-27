@@ -18,6 +18,19 @@ const EmailItem = ({ email, onSelect, isSelected }) => {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
+  // Function to strip HTML tags and get clean text preview
+  const getTextPreview = (htmlContent, plainContent) => {
+    // If we have HTML content, strip the tags
+    if (htmlContent && htmlContent.trim()) {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlContent;
+      const textContent = tempDiv.textContent || tempDiv.innerText || '';
+      return textContent.trim();
+    }
+    // Fallback to plain content
+    return plainContent || 'No preview available';
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -48,7 +61,7 @@ const EmailItem = ({ email, onSelect, isSelected }) => {
         {email.subject}
       </p>
       <p className="mt-1 text-sm text-gray-600 truncate">
-        {email.body}
+        {getTextPreview(email.body, email.plainbody)}
       </p>
     </motion.div>
   );
