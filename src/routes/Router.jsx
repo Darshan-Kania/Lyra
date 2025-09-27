@@ -7,34 +7,46 @@ import EmailsPage from "../pages/EmailsPage";
 import SettingsPage from "../pages/SettingsPage";
 import EmailDetailPage from "../pages/EmailDetailPage";
 import AppLayout from "../components/common/AppLayout";
+import ProtectedRoute from "../components/common/ProtectedRoute";
+
 const PageWithLayout = ({ element }) => (
   <AppLayout>
     {element}
   </AppLayout>
 );
 
+const ProtectedPageWithLayout = ({ element }) => (
+  <ProtectedRoute>
+    <PageWithLayout element={element} />
+  </ProtectedRoute>
+);
+
 const AppRouter = () => (
   <Router>
     <Routes>
+      {/* Public routes */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
+      
+      {/* Protected routes */}
       <Route 
         path="/dashboard" 
-        element={<PageWithLayout element={<Dashboard />} />} 
+        element={<ProtectedPageWithLayout element={<Dashboard />} />} 
       />
       <Route 
         path="/emails" 
-        element={<PageWithLayout element={<EmailsPage />} />} 
+        element={<ProtectedPageWithLayout element={<EmailsPage />} />} 
       />
       <Route 
         path="/emails/:id" 
-        element={<PageWithLayout element={<EmailDetailPage />} />} 
+        element={<ProtectedPageWithLayout element={<EmailDetailPage />} />} 
       />
       <Route 
         path="/settings" 
-        element={<PageWithLayout element={<SettingsPage />} />} 
+        element={<ProtectedPageWithLayout element={<SettingsPage />} />} 
       />
-      {/* Add a catch-all route that redirects to home */}
+      
+      {/* Catch-all route - redirect to landing page */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   </Router>

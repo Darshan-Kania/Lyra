@@ -127,7 +127,8 @@ const LandingPage = () => {
     const checkAuth = async () => {
       const isAuth = await checkAuthStatus();
       if (isAuth) {
-        setButtonShow({ func: () => navigate("/dashboard"), msg: "Go to Dashboard" });
+        // Automatically redirect authenticated users to dashboard
+        navigate("/dashboard", { replace: true });
       }
     };
     checkAuth();

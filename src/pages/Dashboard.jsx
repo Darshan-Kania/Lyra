@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore, useDashboardStore } from '../store';
 import {
@@ -11,6 +11,7 @@ import {
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const hasInitialized = useRef(false);
   
   // Zustand stores
   const { user, fetchUser } = useAuthStore();
@@ -27,15 +28,20 @@ const Dashboard = () => {
   } = useDashboardStore();
 
   useEffect(() => {
-    // Initialize dashboard data
+    // Initialize dashboard data only once when component mounts
     const initializeDashboard = async () => {
-      await fetchUser();
-      await fetchStats();
-      await fetchActivityData();
+      if (!hasInitialized.current) {
+        hasInitialized.current = true;
+        if (!user) {
+          await fetchUser();
+        }
+        await fetchStats();
+        await fetchActivityData();
+      }
     };
 
     initializeDashboard();
-  }, [fetchUser, fetchStats, fetchActivityData]);
+  }, []); // Empty dependency array - only run once on mount
 
   const handleTimeRangeChange = (timeRange) => {
     setTimeRange(timeRange);
