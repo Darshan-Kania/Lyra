@@ -163,33 +163,31 @@ const EmailList = ({
       </div>
       
       {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="flex-shrink-0 border-t border-gray-200 px-4 py-3 flex items-center justify-between">
-          <motion.button 
-            whileHover={{ scale: 1.05 }} 
-            whileTap={{ scale: 0.95 }} 
-            disabled={currentPage === 1} 
-            onClick={() => onPageChange(currentPage - 1)} 
-            className="px-3 py-1 border border-gray-300 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
-          >
-            Prev
-          </motion.button>
-          
-          <span className="text-sm text-gray-700">
-            Page {currentPage} of {totalPages}
-          </span>
-          
-          <motion.button 
-            whileHover={{ scale: 1.05 }} 
-            whileTap={{ scale: 0.95 }} 
-            disabled={currentPage === totalPages} 
-            onClick={() => onPageChange(currentPage + 1)} 
-            className="px-3 py-1 border border-gray-300 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
-          >
-            Next
-          </motion.button>
-        </div>
-      )}
+      <div className="flex-shrink-0 border-t border-gray-200 px-4 py-3 flex items-center justify-between bg-gray-50">
+        <motion.button 
+          whileHover={{ scale: 1.05 }} 
+          whileTap={{ scale: 0.95 }} 
+          disabled={currentPage === 1} 
+          onClick={() => onPageChange(currentPage - 1)} 
+          className="px-3 py-1 border border-gray-300 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+        >
+          Prev
+        </motion.button>
+        
+        <span className="text-sm text-gray-700">
+          Page {currentPage} of {totalPages} ({emails.length} emails)
+        </span>
+        
+        <motion.button 
+          whileHover={{ scale: 1.05 }} 
+          whileTap={{ scale: 0.95 }} 
+          disabled={currentPage === totalPages} 
+          onClick={() => onPageChange(currentPage + 1)} 
+          className="px-3 py-1 border border-gray-300 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+        >
+          Next
+        </motion.button>
+      </div>
     </div>
   );
 };

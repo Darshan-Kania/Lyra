@@ -169,28 +169,47 @@ export const emailsAPI = {
   // Get all emails with pagination
   getEmails: async (filter = "inbox", page = 1, limit = 10) => {
     try {
-      const response = await apiClient.get(
-        `/emails?page=${page}&limit=${limit}`
-      );
-
-      if (response.data.success) {
-        const transformedEmails = transformEmailData(response.data.data);
-
-        // Apply client-side filtering for important emails if needed
-        const filteredEmails =
-          filter === "important"
-            ? transformedEmails.filter((e) => e.important)
-            : transformedEmails;
-
-        return {
-          success: true,
-          emails: filteredEmails,
-          totalCount: response.data.total,
-          totalPages: response.data.totalPages,
-          currentPage: response.data.page,
-        };
+      // For important emails, we need to fetch all emails to properly paginate
+      if (filter === "important") {
+        const response = await apiClient.get(`/emails?page=1&limit=1000`); // Get all emails
+        
+        if (response.data.success) {
+          const transformedEmails = transformEmailData(response.data.data);
+          const importantEmails = transformedEmails.filter((e) => e.important);
+          
+          // Apply client-side pagination
+          const startIndex = (page - 1) * limit;
+          const paginatedEmails = importantEmails.slice(startIndex, startIndex + limit);
+          
+          return {
+            success: true,
+            emails: paginatedEmails,
+            totalCount: importantEmails.length,
+            totalPages: Math.ceil(importantEmails.length / limit),
+            currentPage: page,
+          };
+        } else {
+          throw new Error(response.data.message || "Failed to fetch emails");
+        }
       } else {
-        throw new Error(response.data.message || "Failed to fetch emails");
+        // For inbox, use server-side pagination
+        const response = await apiClient.get(
+          `/emails?page=${page}&limit=${limit}`
+        );
+
+        if (response.data.success) {
+          const transformedEmails = transformEmailData(response.data.data);
+
+          return {
+            success: true,
+            emails: transformedEmails,
+            totalCount: response.data.total,
+            totalPages: response.data.totalPages,
+            currentPage: response.data.page,
+          };
+        } else {
+          throw new Error(response.data.message || "Failed to fetch emails");
+        }
       }
     } catch (error) {
       return {

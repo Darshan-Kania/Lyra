@@ -184,22 +184,16 @@ const useEmailsStore = create(
 export const useEmailSelectors = () => {
   const store = useEmailsStore();
   
-  const filteredEmails = store.selectedCategory === 'important' 
-    ? store.emails.filter(e => e.important)
-    : store.emails;
-
-  const paginatedEmails = (() => {
-    const startIndex = (store.currentPage - 1) * store.itemsPerPage;
-    return filteredEmails.slice(startIndex, startIndex + store.itemsPerPage);
-  })();
+  // For server-side pagination, we don't need to slice again
+  // The emails array already contains the correct page of results
+  const paginatedEmails = store.emails;
 
   const selectedEmail = store.emails.find(e => e.id === store.selectedEmailId) || null;
   const unreadCount = store.emails.filter(e => !e.read).length;
-  const totalPages = Math.ceil(filteredEmails.length / store.itemsPerPage);
+  const totalPages = Math.ceil(store.totalCount / store.itemsPerPage);
 
   return {
     ...store,
-    filteredEmails,
     paginatedEmails,
     selectedEmail,
     unreadCount,
