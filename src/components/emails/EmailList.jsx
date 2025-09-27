@@ -24,8 +24,17 @@ const EmailItem = ({ email, onSelect, isSelected }) => {
     if (htmlContent && htmlContent.trim()) {
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = htmlContent;
+      
+      // Remove style and script tags completely
+      const styleTags = tempDiv.querySelectorAll('style, script');
+      styleTags.forEach(tag => tag.remove());
+      
+      // Get clean text content
       const textContent = tempDiv.textContent || tempDiv.innerText || '';
-      return textContent.trim();
+      
+      // Clean up extra whitespace and return first 150 characters
+      const cleanText = textContent.replace(/\s+/g, ' ').trim();
+      return cleanText.length > 150 ? cleanText.substring(0, 150) + '...' : cleanText;
     }
     // Fallback to plain content
     return plainContent || 'No preview available';
