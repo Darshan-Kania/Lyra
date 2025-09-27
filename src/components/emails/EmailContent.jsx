@@ -108,9 +108,18 @@ const EmailContent = ({ selectedEmail, isLoading }) => {
           
           {/* Email Body */}
           <div className="prose max-w-none text-gray-700 leading-relaxed">
-            <div className="whitespace-pre-wrap">
-              {selectedEmail.body}
-            </div>
+            {selectedEmail.body && selectedEmail.body.trim() ? (
+              // Render HTML content with Tailwind prose styling
+              <div 
+                dangerouslySetInnerHTML={{ __html: selectedEmail.body }}
+                className="prose prose-gray max-w-none break-words [&_img]:max-w-full [&_img]:h-auto [&_table]:max-w-full [&_a]:text-indigo-600 [&_a]:underline"
+              />
+            ) : (
+              // Fallback to plain text
+              <div className="whitespace-pre-wrap break-words">
+                {selectedEmail.plainbody || selectedEmail.body || 'No content available'}
+              </div>
+            )}
           </div>
 
           {/* Summarized Content */}
