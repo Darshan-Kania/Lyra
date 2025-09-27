@@ -128,12 +128,21 @@ const LandingPage = () => {
     const checkAuth = async () => {
       const isAuth = await checkAuthStatus();
       if (isAuth) {
-        // Automatically redirect authenticated users to dashboard
-        navigate("/dashboard", { replace: true });
+        // Check if this is a success callback - if so, don't auto-redirect
+        const params = new URLSearchParams(location.search);
+        const auth = params.get("auth");
+        
+        if (auth !== "success") {
+          // Only auto-redirect if not showing success message
+          navigate("/dashboard", { replace: true });
+        } else {
+          // User just logged in successfully, show button to go to dashboard
+          setButtonShow({ func: () => navigate("/dashboard"), msg: "Go to Dashboard" });
+        }
       }
     };
     checkAuth();
-  }, [navigate, checkAuthStatus]);
+  }, [navigate, checkAuthStatus, location.search]);
 
   // Show popup if redirected from AuthCallback or ProtectedRoute
   useEffect(() => {
@@ -141,8 +150,10 @@ const LandingPage = () => {
     const auth = params.get("auth");
     if (auth === "success") {
       setShowSuccess(true);
+      setButtonShow({ func: () => navigate("/dashboard"), msg: "Go to Dashboard" });
+      // Hide confetti after 5 seconds and redirect after 6 seconds
       setTimeout(() => setShowSuccess(false), 5000);
-      navigate("/", { replace: true });
+      setTimeout(() => navigate("/dashboard", { replace: true }), 6000);
     } else if (auth === "failed") {
       setShowError(true);
       setTimeout(() => setShowError(false), 5000);
