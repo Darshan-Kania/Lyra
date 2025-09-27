@@ -96,7 +96,6 @@ const EmailsPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <EmailsHeader 
-        onGoBack={handleGoBack}
         unreadCount={unreadCount}
       />
       

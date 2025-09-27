@@ -1,8 +1,10 @@
 // Emails page header component
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store';
 
-const EmailsHeader = ({ onGoBack, unreadCount }) => {
+const EmailsHeader = ({ unreadCount }) => {
+  const navigate = useNavigate();
   const  authStore  = useAuthStore();
   const userName = authStore.user?.name || 'Guest';
 
@@ -17,7 +19,7 @@ const EmailsHeader = ({ onGoBack, unreadCount }) => {
         )}
       </h1>
       <button 
-        onClick={onGoBack} 
+        onClick={() => navigate('/dashboard')} 
         className="text-sm text-indigo-600 hover:underline transition-colors"
       >
         ← Back to Dashboard
