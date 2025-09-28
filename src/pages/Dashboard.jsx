@@ -14,7 +14,7 @@ const Dashboard = () => {
   const hasInitialized = useRef(false);
   
   // Zustand stores
-  const { user, fetchUser } = useAuthStore();
+  const { user, fetchUser, logout } = useAuthStore();
   const {
     stats,
     topContacts,
@@ -57,6 +57,14 @@ const Dashboard = () => {
 
   const handleNavigateToEmails = () => {
     navigate('/emails');
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } finally {
+      navigate('/', { replace: true });
+    }
   };
 
   // Error handling
@@ -104,6 +112,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           <QuickActions 
             onNavigate={navigate}
+            onLogout={handleLogout}
           />
           
           <TopContacts 
