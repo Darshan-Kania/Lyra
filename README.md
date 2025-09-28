@@ -86,10 +86,12 @@ npm run preview
 
 ## 🔗 API Integration
 
-The application is designed to work with a backend API. Set your backend URL in the environment:
+The application is designed to work with a backend API. Set your backend URL and optional timeout in the environment:
 
 ```bash
 VITE_BACKEND_URL=http://localhost:3001
+# 0 disables timeout (good for dev), or set to e.g. 30000 for 30s
+VITE_API_TIMEOUT=0
 ```
 
 API endpoints from backend:
@@ -99,7 +101,7 @@ API endpoints from backend:
 - `GET /dashboard/EmailCount` - Get email counts
 - `GET /user/topContacts` - Get frequent contacts
 - `POST /auth/logout` - Logout user
- - `POST /updationFilter` - Update settings filters
+- `POST /updationFilter` - Update settings filters
 
 ## 📝 Notes
 
@@ -107,3 +109,7 @@ API endpoints from backend:
 - UI components do not call HTTP directly—stores/hooks handle it
 - Intelligent caching in stores reduces API calls
 - Clean separation of concerns improves maintainability
+
+### Environment files
+- Copy `.env.example` to `.env.local` (already provided) and adjust values.
+- `VITE_API_TIMEOUT` defaults to 0 (no timeout) to avoid blank pages on slow responses during development.

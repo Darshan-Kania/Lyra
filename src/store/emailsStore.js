@@ -32,14 +32,23 @@ const useEmailsStore = create(
     try {
       const result = await emailsAPI.getEmails(selectedCategory, currentPage, itemsPerPage);
       
-      set({
-        emails: result.emails,
-        totalCount: result.totalCount,
-        currentPage: result.currentPage || currentPage,
-        isLoading: false,
-        error: result.error || null,
-        lastFetched: now
-      });
+      if (result.success) {
+        set({
+          emails: Array.isArray(result.emails) ? result.emails : [],
+          totalCount: Number.isFinite(result.totalCount) ? result.totalCount : (Array.isArray(result.emails) ? result.emails.length : 0),
+          currentPage: result.currentPage || currentPage,
+          isLoading: false,
+          error: null,
+          lastFetched: now
+        });
+      } else {
+        // Preserve previous emails on failure, just flag error
+        set({
+          isLoading: false,
+          error: result.error || 'Failed to fetch emails'
+        });
+        return; // don't proceed to hydrate on failure
+      }
 
   // Hydrate selected email with full details (summary, AI replies) if one is already selected (e.g., persisted)
   const { selectedEmailId: idToHydrate } = get();
@@ -61,7 +70,7 @@ const useEmailsStore = create(
     } catch (error) {
       set({
         isLoading: false,
-        error: error.message
+        error: error.message || 'Request failed'
       });
     }
   },

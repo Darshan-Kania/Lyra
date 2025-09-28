@@ -38,54 +38,65 @@ export const emailsAPI = {
   // Get all emails with pagination
   getEmails: async (filter = "inbox", page = 1, limit = 10) => {
     try {
-      // For important emails, we need to fetch all emails to properly paginate
+      // Helper to normalize various backend response shapes
+      const normalizeList = (raw, fallbackPage = page, fallbackLimit = limit) => {
+        const rd = raw ?? {};
+        let items = [];
+        if (Array.isArray(rd)) items = rd;
+        else if (Array.isArray(rd.data)) items = rd.data;
+        else if (Array.isArray(rd.emails)) items = rd.emails;
+        else if (rd.data && Array.isArray(rd.data.emails)) items = rd.data.emails;
+        else if (rd.data && Array.isArray(rd.data.data)) items = rd.data.data; // nested data
+        else if (rd.data && Array.isArray(rd.data.list)) items = rd.data.list;
+
+        const total = rd.total ?? rd.totalCount ?? (Array.isArray(items) ? items.length : 0);
+        const currentPage = rd.page ?? rd.currentPage ?? fallbackPage;
+        const totalPages = rd.totalPages ?? (fallbackLimit ? Math.max(1, Math.ceil(total / fallbackLimit)) : 1);
+        const message = rd.message ?? rd.error ?? null;
+        const explicitFailure = rd.success === false; // treat only explicit false as failure
+        return { items, total, currentPage, totalPages, message, explicitFailure };
+      };
+
       if (filter === "important") {
-        const response = await apiClient.get(`/emails?page=1&limit=1000`); // Get all emails
-        
-        if (response.data.success) {
-          const transformedEmails = transformEmailData(response.data.data);
-          const importantEmails = transformedEmails.filter((e) => e.important);
-          
-          // Apply client-side pagination
-          const startIndex = (page - 1) * limit;
-          const paginatedEmails = importantEmails.slice(startIndex, startIndex + limit);
-          
-          return {
-            success: true,
-            emails: paginatedEmails,
-            totalCount: importantEmails.length,
-            totalPages: Math.ceil(importantEmails.length / limit),
-            currentPage: page,
-          };
-        } else {
-          throw new Error(response.data.message || "Failed to fetch emails");
+        // Fetch many to allow client-side filtering of important items
+        const response = await apiClient.get(`/emails?page=1&limit=1000`);
+        const { items, message, explicitFailure } = normalizeList(response.data, 1, 1000);
+        if (explicitFailure && (!items || items.length === 0)) {
+          return { success: false, emails: [], totalCount: 0, totalPages: 1, currentPage: page, error: message || "Failed to fetch emails" };
         }
-      } else {
-        // For inbox, use server-side pagination
-        const response = await apiClient.get(
-          `/emails?page=${page}&limit=${limit}`
-        );
-
-        if (response.data.success) {
-          const transformedEmails = transformEmailData(response.data.data);
-
-          return {
-            success: true,
-            emails: transformedEmails,
-            totalCount: response.data.total,
-            totalPages: response.data.totalPages,
-            currentPage: response.data.page,
-          };
-        } else {
-          throw new Error(response.data.message || "Failed to fetch emails");
-        }
+        const transformedEmails = transformEmailData(items || []);
+        const importantEmails = transformedEmails.filter((e) => e.important);
+        const startIndex = (page - 1) * limit;
+        const paginatedEmails = importantEmails.slice(startIndex, startIndex + limit);
+        return {
+          success: true,
+          emails: paginatedEmails,
+          totalCount: importantEmails.length,
+          totalPages: Math.max(1, Math.ceil(importantEmails.length / limit)),
+          currentPage: page,
+        };
       }
+
+      // Inbox or other categories: rely on server pagination, but be flexible
+      const response = await apiClient.get(`/emails?page=${page}&limit=${limit}`);
+      const { items, total, totalPages, currentPage, message, explicitFailure } = normalizeList(response.data, page, limit);
+      if (explicitFailure && (!items || items.length === 0)) {
+        return { success: false, emails: [], totalCount: 0, totalPages: 1, currentPage: page, error: message || "Failed to fetch emails" };
+      }
+      const transformedEmails = transformEmailData(items || []);
+      return {
+        success: true,
+        emails: transformedEmails,
+        totalCount: total,
+        totalPages: totalPages,
+        currentPage: currentPage,
+      };
     } catch (error) {
       return {
         success: false,
-        emails: null,
-        totalCount: null,
-        totalPages: null,
+        emails: [],
+        totalCount: 0,
+        totalPages: 1,
         currentPage: page,
         error: error.message,
       };
@@ -133,36 +144,31 @@ export const emailsAPI = {
   getEmailById: async (emailId) => {
     try {
       const response = await apiClient.get(`/emails/${emailId}`);
-
-      if (response.data.success) {
-        const email = response.data.data;
-        return {
-          success: true,
-          email: {
-            id: email._id,
-            sender: email.from || "Unknown",
-            senderEmail: email.from || "",
-            subject: email.subject || "No subject",
-            snippet: email.snippet || "",
-            body: email.bodyHtml || "",
-            plainbody: email.bodyPlain || "",
-            date: email.createdAt || email.date,
-            read: email.read || false,
-            important: email.important || false,
-            gmailMessageId: email.gmailMessageId,
-            summary: email.summary || null,
-            aiReplies: normalizeAiReplies(email),
-          },
-        };
-      } else {
-        throw new Error(response.data.message || "Email not found");
+      const rd = response.data ?? {};
+      // Accept multiple shapes
+      const email = rd.data || rd.email || rd.item || rd;
+      const explicitFailure = rd.success === false;
+      if (!email || explicitFailure) {
+        return { success: false, email: null, error: rd.message || "Email not found" };
       }
-    } catch (error) {
-      return {
-        success: false,
-        email: null,
-        error: error.message,
+      const mapped = {
+        id: email._id || email.id || email.gmailMessageId,
+        sender: email.from || email.sender || "Unknown",
+        senderEmail: email.from || email.senderEmail || "",
+        subject: email.subject || "No subject",
+        snippet: email.snippet || "",
+        body: email.bodyHtml || email.body || "",
+        plainbody: email.bodyPlain || email.plainbody || email.plaintext || "",
+        date: email.createdAt || email.date,
+        read: email.read || false,
+        important: email.important || false,
+        gmailMessageId: email.gmailMessageId,
+        summary: email.summary || null,
+        aiReplies: normalizeAiReplies(email),
       };
+      return { success: true, email: mapped };
+    } catch (error) {
+      return { success: false, email: null, error: error.message };
     }
   },
 

@@ -2,12 +2,13 @@
 import axios from 'axios';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const API_TIMEOUT = Number(import.meta.env.VITE_API_TIMEOUT ?? 0); // 0 = no timeout
 
 // Create axios instance with default configuration
 export const apiClient = axios.create({
   baseURL: BACKEND_URL,
   withCredentials: true,
-  timeout: 10000,
+  timeout: Number.isFinite(API_TIMEOUT) ? API_TIMEOUT : 0,
   headers: {
     'Content-Type': 'application/json',
   },
