@@ -8,7 +8,9 @@ const useAuthStore = create(
     (set, get) => ({
       // State
       isAuthenticated: false,
-      isLoading: false,
+  isLoading: false, // backward-compatible aggregate
+  isAuthLoading: false,
+  isUserLoading: false,
       user: null,
       error: null,
       _activeRequests: new Set(), // Track active API requests
@@ -23,22 +25,24 @@ const useAuthStore = create(
         }
         
         _activeRequests.add('checkAuthStatus');
-        set({ isLoading: true, error: null });
+        set((state) => ({ isAuthLoading: true, isLoading: true, error: null }));
         
         try {
           const result = await authAPI.checkAuthStatus();
-          set({ 
+          set((state) => ({ 
             isAuthenticated: result.isAuthenticated,
-            isLoading: false,
+            isAuthLoading: false,
+            isLoading: state.isUserLoading || false,
             error: result.error || null
-          });
+          }));
           return result.isAuthenticated;
         } catch (error) {
-          set({ 
+          set((state) => ({ 
             isAuthenticated: false,
-            isLoading: false,
+            isAuthLoading: false,
+            isLoading: state.isUserLoading || false,
             error: error.message
-          });
+          }));
           return false;
         } finally {
           _activeRequests.delete('checkAuthStatus');
@@ -59,33 +63,36 @@ const useAuthStore = create(
     }
     
     _activeRequests.add('fetchUser');
-    set({ isLoading: true, error: null });
+    set((state) => ({ isUserLoading: true, isLoading: true, error: null }));
     
     try {
       const result = await authAPI.getCurrentUser();
       if (result.success) {
-        set({ 
+        set((state) => ({ 
           user: result.user,
           isAuthenticated: true,
-          isLoading: false,
+          isUserLoading: false,
+          isLoading: state.isAuthLoading || false,
           error: null
-        });
+        }));
       } else {
-        set({ 
+        set((state) => ({ 
           user: null,
           isAuthenticated: false,
-          isLoading: false,
+          isUserLoading: false,
+          isLoading: state.isAuthLoading || false,
           error: result.error
-        });
+        }));
       }
       return result;
     } catch (error) {
-      set({ 
+      set((state) => ({ 
         user: null,
         isAuthenticated: false,
-        isLoading: false,
+        isUserLoading: false,
+        isLoading: state.isAuthLoading || false,
         error: error.message
-      });
+      }));
       return { success: false, error: error.message };
     } finally {
       _activeRequests.delete('fetchUser');
@@ -97,19 +104,22 @@ const useAuthStore = create(
   },
 
   logout: async () => {
-    set({ isLoading: true });
+    set({ isLoading: true, isAuthLoading: true });
     try {
       const result = await authAPI.logout();
       set({
         isAuthenticated: false,
         user: null,
         isLoading: false,
+        isAuthLoading: false,
+        isUserLoading: false,
         error: null
       });
       return result;
     } catch (error) {
       set({ 
         isLoading: false,
+        isAuthLoading: false,
         error: error.message
       });
       return { success: false, error: error.message };
@@ -123,6 +133,8 @@ const useAuthStore = create(
   resetAuth: () => set({
     isAuthenticated: false,
     isLoading: false,
+    isAuthLoading: false,
+    isUserLoading: false,
     user: null,
     error: null
   })

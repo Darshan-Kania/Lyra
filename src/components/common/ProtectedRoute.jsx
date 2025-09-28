@@ -4,7 +4,7 @@ import useAuthStore from '../../store/authStore';
 
 const ProtectedRoute = ({ children }) => {
   const location = useLocation();
-  const { isAuthenticated, isLoading, checkAuthStatus, fetchUser } = useAuthStore();
+  const { isAuthenticated, isAuthLoading, checkAuthStatus, fetchUser } = useAuthStore();
   const hasInitialized = useRef(false);
 
   useEffect(() => {
@@ -12,7 +12,7 @@ const ProtectedRoute = ({ children }) => {
     
     // Only run auth check once when component mounts
     const initAuth = async () => {
-      if (!hasInitialized.current && !isAuthenticated && !isLoading && isMounted) {
+  if (!hasInitialized.current && !isAuthenticated && !isAuthLoading && isMounted) {
         hasInitialized.current = true;
         const isAuth = await checkAuthStatus();
         if (isAuth && isMounted) {
@@ -31,7 +31,7 @@ const ProtectedRoute = ({ children }) => {
   }, []); // run once
 
   // Show loading while checking authentication
-  if (isLoading) {
+  if (isAuthLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
