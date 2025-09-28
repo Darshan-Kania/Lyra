@@ -27,7 +27,8 @@ const ProtectedRoute = ({ children }) => {
     return () => {
       isMounted = false;
     };
-  }, []); // Empty dependency array - only run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // run once
 
   // Show loading while checking authentication
   if (isLoading) {

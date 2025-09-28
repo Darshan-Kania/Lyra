@@ -77,13 +77,9 @@ const EmailItem = ({ email, onSelect, isSelected }) => {
 };
 
 const EmailSidebar = ({ 
-  emails, 
-  selectedEmailId, 
-  onSelectEmail, 
   selectedCategory,
   onCategoryChange,
-  unreadCount,
-  isLoading 
+  unreadCount
 }) => {
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">

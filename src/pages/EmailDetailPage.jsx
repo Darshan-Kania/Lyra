@@ -8,11 +8,9 @@ const EmailDetailPage = () => {
   const navigate = useNavigate();
 
   const {
-    emails,
     selectedEmail,
     selectedEmailId,
     isLoading,
-    error,
     fetchEmails,
     selectEmail,
   } = useEmailSelectors();

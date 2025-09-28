@@ -154,6 +154,16 @@ const useEmailsStore = create(
   // Clear error state
   clearError: () => set({ error: null }),
 
+  // Send a reply to an email (delegates to API; keeps UI free of HTTP calls)
+  sendReply: async (emailId, message) => {
+    try {
+      const res = await emailsAPI.sendReply(emailId, message);
+      return res;
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  },
+
   // Reset emails state
   reset: () => set({
     emails: [],

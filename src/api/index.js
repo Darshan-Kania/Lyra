@@ -3,3 +3,4 @@ export { authAPI } from './auth.js';
 export { dashboardAPI } from './dashboard.js';
 export { emailsAPI } from './emails.js';
 export { default as apiClient } from './client.js';
+export { settingsAPI } from './settings.js';

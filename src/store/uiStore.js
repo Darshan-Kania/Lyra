@@ -4,7 +4,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 
 const useUiStore = create(
   persist(
-    (set, get) => ({
+    (set) => ({
       // number of ongoing requests
       globalLoadingCount: 0,
 

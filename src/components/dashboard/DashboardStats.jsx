@@ -1,6 +1,5 @@
 // Dashboard Stats Cards Component
 import React from 'react';
-import { motion } from 'framer-motion';
 
 const StatsCard = ({ title, value, icon, subtitle, trend, color = 'indigo' }) => {
   const colorClasses = {
@@ -13,10 +12,7 @@ const StatsCard = ({ title, value, icon, subtitle, trend, color = 'indigo' }) =>
   const trendColor = trend?.startsWith('+') ? 'text-red-600' : trend?.startsWith('-') ? 'text-green-600' : 'text-gray-600';
 
   return (
-    <motion.div 
-      whileHover={{ y: -5 }}
-      className="bg-white shadow-sm rounded-xl p-6 border border-gray-100"
-    >
+    <div className="bg-white shadow-sm rounded-xl p-6 border border-gray-100">
       <div className="flex justify-between items-center">
         <div>
           <p className="text-sm text-gray-500 font-medium">{title}</p>
@@ -34,7 +30,7 @@ const StatsCard = ({ title, value, icon, subtitle, trend, color = 'indigo' }) =>
           </span>
         )}
       </div>
-    </motion.div>
+  </div>
   );
 };
 
@@ -92,7 +88,7 @@ const DashboardStats = ({ stats, isLoading }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
       {statsConfig.map((stat, index) => (
-        <StatsCard key={index} {...stat} />
+  <StatsCard key={index} {...stat} />
       ))}
     </div>
   );

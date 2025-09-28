@@ -5,20 +5,18 @@ import { useEmailSelectors } from '../store/emailsStore';
 import {
   EmailsHeader,
   EmailSidebar,
-  EmailList,
-  EmailContent
+  EmailList
 } from '../components/emails';
 
 const EmailsPage = () => {
   const navigate = useNavigate();
   const [showSidebar, setShowSidebar] = useState(true);
-  const [focusEmailView, setFocusEmailView] = useState(false);
+  // list-only page
   
   // Zustand email store with selectors
   const {
     paginatedEmails,
-    selectedEmail,
-    selectedEmailId,
+  selectedEmailId,
     selectedCategory,
     currentPage,
     totalPages,
@@ -26,15 +24,14 @@ const EmailsPage = () => {
     isLoading,
     error,
     fetchEmails,
-    selectEmail,
     setCategory,
     setPage
   } = useEmailSelectors();
 
   useEffect(() => {
-    // Initialize emails data
     fetchEmails();
-  }, [fetchEmails]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSelectEmail = (emailId) => {
     // navigate to detail route; EmailDetailPage will select and fetch
@@ -49,13 +46,7 @@ const EmailsPage = () => {
     setPage(page);
   };
 
-  const handleGoBack = () => {
-    if (focusEmailView) {
-      setFocusEmailView(false); // exit full email view to list
-    } else {
-      navigate(-1);
-    }
-  };
+  // No back handler needed here; navigation handled elsewhere
 
   // Loading state
   if (isLoading && paginatedEmails.length === 0) {

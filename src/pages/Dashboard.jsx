@@ -50,11 +50,10 @@ const Dashboard = () => {
     return () => {
       isMounted = false;
     };
-  }, []); // Empty dependency array - only run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const handleTimeRangeChange = (timeRange) => {
-    setTimeRange(timeRange);
-  };
+  const handleTimeRangeChange = (timeRange) => setTimeRange(timeRange);
 
   const handleNavigateToEmails = () => {
     navigate('/emails');

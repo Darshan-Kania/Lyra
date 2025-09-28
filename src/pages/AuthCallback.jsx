@@ -16,7 +16,7 @@ const AuthCallback = () => {
         } else {
           navigate('/?auth=failed', { replace: true });
         }
-      } catch (error) {
+    } catch {
         navigate('/?auth=failed', { replace: true });
       }
     };

@@ -3,7 +3,7 @@ import Confetti from "react-confetti";
 import { motion } from "framer-motion";
 import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim"; // Use loadSlim for smaller bundle
-import { Footer } from "../components/common/Footer"; // Assuming this path is correct
+import { Footer } from "../components/common/Footer";
 import { useAuthStore } from "../store";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -114,7 +114,7 @@ const LandingPage = () => {
   const location = useLocation();
   
   // Auth store
-  const { isAuthenticated, checkAuthStatus, initiateGoogleLogin } = useAuthStore();
+  const { checkAuthStatus, initiateGoogleLogin } = useAuthStore();
   
   const [buttonShow, setButtonShow] = React.useState({ 
     func: initiateGoogleLogin, 

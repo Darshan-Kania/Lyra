@@ -11,6 +11,7 @@ src/
 │   ├── auth.js            # Authentication API methods
 │   ├── dashboard.js       # Dashboard/stats API methods
 │   ├── emails.js          # Email management API methods
+│   ├── settings.js        # Settings API methods
 │   └── index.js           # API exports
 ├── store/                  # Zustand state stores
 │   ├── authStore.js       # Authentication state
@@ -40,7 +41,7 @@ Modern React email client with AI‑assisted workflows.
 - Full‑screen email detail route with clean reading experience
 - AI summary of each email’s content
 - Three AI quick‑reply suggestions with Send action
-- Global loading overlay for a smooth, consistent feel
+- Simple, local loading states (no global loader/bus)
 - Sidebar toggle on smaller screens
 - Pagination and basic importance/read states
 - Graceful fallback data when backend is unavailable
@@ -48,14 +49,12 @@ Modern React email client with AI‑assisted workflows.
 ## Libraries (what we used and where)
 - React + Vite — application UI and fast dev/build tooling
 - React Router — navigation (list: /emails, detail: /emails/:id)
-- Zustand — app state (auth, dashboard, emails, ui)
-- Axios — HTTP client with interceptors (centralized headers, global loader)
+- Zustand — app state (auth, dashboard, emails)
+- Axios — HTTP client with light interceptors (no global side-effects)
 - Tailwind CSS — styling system for rapid, consistent UI
 - Framer Motion — micro‑interactions and subtle animations
 - Recharts — dashboard charts and visualizations
-- @fontsource/inter — typography (Inter font)
-- classnames — conditional class management
-- js-cookie — lightweight cookie utilities for auth/session needs
+ 
 4. **Components** receive data via props and emit events via callbacks
 
 ## 🧪 Development
@@ -100,10 +99,11 @@ API endpoints from backend:
 - `GET /dashboard/EmailCount` - Get email counts
 - `GET /user/topContacts` - Get frequent contacts
 - `POST /auth/logout` - Logout user
+ - `POST /updationFilter` - Update settings filters
 
 ## 📝 Notes
 
-- This refactored version reduces API calls through intelligent caching
-- Components are now highly reusable and testable
-- State management is centralized and predictable
-- The codebase is more maintainable with clear separation of concerns
+- This refactor centralizes all API calls in `src/api` and store actions
+- UI components do not call HTTP directly—stores/hooks handle it
+- Intelligent caching in stores reduces API calls
+- Clean separation of concerns improves maintainability

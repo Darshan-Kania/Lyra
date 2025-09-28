@@ -10,13 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fontsource/inter": "^5.2.7",
-    "@shadcn/ui": "^0.0.4",
     "@tailwindcss/vite": "^4.1.13",
     "axios": "^1.12.1",
-    "classnames": "^2.5.1",
     "framer-motion": "^12.23.12",
-    "js-cookie": "^3.0.5",
     "react": "^19.1.1",
     "react-confetti": "^6.4.0",
     "react-dom": "^19.1.1",
@@ -32,6 +28,7 @@
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "@vitejs/plugin-react": "^5.0.0",
+  "eslint-plugin-react": "^7.37.0",
     "eslint": "^9.33.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",

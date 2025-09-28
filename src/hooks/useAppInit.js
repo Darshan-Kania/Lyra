@@ -1,10 +1,9 @@
 // App initialization hook
 import { useEffect } from 'react';
-import { useAuthStore, useDashboardStore } from '../store';
+import { useAuthStore } from '../store';
 
 export const useAppInit = () => {
   const { isAuthenticated, checkAuthStatus, fetchUser } = useAuthStore();
-  const { fetchStats, fetchActivityData } = useDashboardStore();
 
   useEffect(() => {
     const initApp = async () => {

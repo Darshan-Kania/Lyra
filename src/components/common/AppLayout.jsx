@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useAuthStore } from "../../store";
-import GlobalLoader from "./GlobalLoader";
 
 const AppLayout = ({ children }) => {
   const navigate = useNavigate();
@@ -18,28 +17,15 @@ const AppLayout = ({ children }) => {
   };
 
   const handleLogout = async () => {
-    console.log("Logging out...");
-    
     try {
-      const result = await logout();
-      if (result.success) {
-        console.log("Logged out successfully");
-        navigate("/", { replace: true });
-      } else {
-        console.error("Logout failed:", result.error);
-        // Still redirect to home page
-        navigate("/", { replace: true });
-      }
-    } catch (error) {
-      console.error("Error during logout:", error);
-      // Still redirect to home page
+      await logout();
+    } finally {
       navigate("/", { replace: true });
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-  <GlobalLoader />
       {/* Navbar */}
       <header className="bg-white shadow-sm">
         <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">

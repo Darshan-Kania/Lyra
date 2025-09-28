@@ -1,21 +1,15 @@
 // Email Content Display Component
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { emailsAPI } from '../../api';
+import useEmailsStore from '../../store/emailsStore.js';
 
 const EmailContent = ({ selectedEmail, isLoading }) => {
-  // Log the full selected email object whenever it changes for debugging
-  useEffect(() => {
-    if (selectedEmail) {
-      console.log('[EmailContent] Selected Email:', selectedEmail);
-    } else {
-      console.log('[EmailContent] No email selected');
-    }
-  }, [selectedEmail]);
+  // Keep component pure and quiet in production
 
   // Hooks must be called unconditionally and in the same order
   const [sendingId, setSendingId] = useState(null);
   const [sendError, setSendError] = useState(null);
+  const sendReply = useEmailsStore(s => s.sendReply);
 
   if (isLoading) {
     return (
@@ -53,7 +47,7 @@ const EmailContent = ({ selectedEmail, isLoading }) => {
     if (!selectedEmail?.id || !text) return;
     setSendError(null);
     setSendingId(text);
-    const res = await emailsAPI.sendReply(selectedEmail.id, text);
+    const res = await sendReply(selectedEmail.id, text);
     if (!res.success) {
       setSendError('Failed to send. Please try again.');
     }

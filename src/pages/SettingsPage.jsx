@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store';
-import apiClient from '../api/client';
+import { settingsAPI } from '../api';
 
 const SettingsPage = () => {
   const navigate = useNavigate();
@@ -36,11 +36,8 @@ const SettingsPage = () => {
     setIsLoading(true);
     try {
       const validFilters = emailFilters.filter(email => email.trim() !== '');
-      const response = await apiClient.post('/updationFilter', {
-        emailFilters: validFilters
-      });
-      
-      if (response.data.success) {
+      const response = await settingsAPI.updateFilters(validFilters);
+      if (response.success) {
         navigate('/dashboard');
       } else {
         alert('Failed to save settings. Please try again.');

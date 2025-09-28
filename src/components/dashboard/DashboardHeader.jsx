@@ -1,6 +1,5 @@
 // Dashboard Header Component
 import React from 'react';
-import { motion } from 'framer-motion';
 
 const DashboardHeader = ({ user, onNavigateToEmails }) => {
   const getUserDisplayName = () => {
@@ -26,9 +25,7 @@ const DashboardHeader = ({ user, onNavigateToEmails }) => {
       </div>
       
       <div className="mt-4 md:mt-0">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <button
           onClick={onNavigateToEmails}
           className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
         >
@@ -36,7 +33,7 @@ const DashboardHeader = ({ user, onNavigateToEmails }) => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
           View All Emails
-        </motion.button>
+  </button>
       </div>
     </div>
   );
