@@ -14,7 +14,14 @@ const EmailContent = ({ selectedEmail, isLoading }) => {
   if (isLoading) {
     return (
       <div className="flex-grow bg-white p-8 overflow-y-auto flex items-center justify-center">
-        <div className="text-gray-500">Loading email...</div>
+        <div className="flex flex-col items-center">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full"
+          />
+          <p className="mt-4 text-sm text-gray-500">Loading email…</p>
+        </div>
       </div>
     );
   }

@@ -111,5 +111,4 @@ API endpoints from backend:
 - Clean separation of concerns improves maintainability
 
 ### Environment files
-- Copy `.env.example` to `.env.local` (already provided) and adjust values.
 - `VITE_API_TIMEOUT` defaults to 0 (no timeout) to avoid blank pages on slow responses during development.

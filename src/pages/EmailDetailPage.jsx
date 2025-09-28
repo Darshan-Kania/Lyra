@@ -10,7 +10,8 @@ const EmailDetailPage = () => {
   const {
     selectedEmail,
     selectedEmailId,
-    isLoading,
+  isLoading,
+  isDetailLoading,
     fetchEmails,
     selectEmail,
   } = useEmailSelectors();
@@ -35,7 +36,7 @@ const EmailDetailPage = () => {
       </header>
       <main className="flex-grow flex min-h-0">
         <div className="flex-grow">
-          <EmailContent selectedEmail={selectedEmail} isLoading={isLoading} />
+          <EmailContent selectedEmail={selectedEmail} isLoading={isLoading || isDetailLoading} />
         </div>
       </main>
     </div>
