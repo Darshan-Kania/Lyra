@@ -23,6 +23,7 @@ const transformEmailData = (backendEmails) => {
     senderEmail: email.from || "",
     subject: email.subject || "No subject",
     body: email.body || email.snippet || "",
+    plainbody: email.plainbody || email.plaintext || email.textContent || "",
     date: email.createdAt || email.date,
     read: email.read || false,
     important: email.important || false,

@@ -108,18 +108,27 @@ const EmailContent = ({ selectedEmail, isLoading }) => {
           
           {/* Email Body */}
           <div className="prose max-w-none text-gray-700 leading-relaxed">
-            {selectedEmail.body && selectedEmail.body.trim() ? (
-              // Render HTML content with Tailwind prose styling
-              <div 
-                dangerouslySetInnerHTML={{ __html: selectedEmail.body }}
-                className="prose prose-gray max-w-none break-words [&_img]:max-w-full [&_img]:h-auto [&_table]:max-w-full [&_a]:text-indigo-600 [&_a]:underline"
-              />
-            ) : (
-              // Fallback to plain text
-              <div className="whitespace-pre-wrap break-words">
-                {selectedEmail.plainbody || selectedEmail.body || 'No content available'}
-              </div>
-            )}
+            {(() => {
+              const bodyContent = selectedEmail.body || selectedEmail.plainbody || '';
+              const isHTML = bodyContent.includes('<') && bodyContent.includes('>');
+              
+              if (isHTML && bodyContent.trim()) {
+                // Render HTML content with Tailwind prose styling
+                return (
+                  <div 
+                    dangerouslySetInnerHTML={{ __html: bodyContent }}
+                    className="prose prose-gray max-w-none break-words [&_img]:max-w-full [&_img]:h-auto [&_table]:max-w-full [&_a]:text-indigo-600 [&_a]:underline [&_table]:border-collapse [&_td]:border [&_th]:border [&_td]:p-2 [&_th]:p-2"
+                  />
+                );
+              } else {
+                // Fallback to plain text
+                return (
+                  <div className="whitespace-pre-wrap break-words">
+                    {selectedEmail.plainbody || selectedEmail.body || 'No content available'}
+                  </div>
+                );
+              }
+            })()}
           </div>
 
           {/* Summarized Content */}
