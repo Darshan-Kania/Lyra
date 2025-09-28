@@ -24,13 +24,8 @@ export const useAppInit = () => {
     initApp();
   }, [isAuthenticated, checkAuthStatus, fetchUser]);
 
-  // Auto-fetch dashboard data when authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchStats();
-      fetchActivityData();
-    }
-  }, [isAuthenticated, fetchStats, fetchActivityData]);
+  // Note: Dashboard data fetching is handled by individual dashboard components/pages
+  // to avoid duplicate API calls
 
   return { isAuthenticated };
 };

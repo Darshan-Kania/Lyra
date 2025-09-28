@@ -19,9 +19,20 @@ const useDashboardStore = create(
       isLoading: false,
       error: null,
       lastFetched: null,
+      
+      // Request deduplication
+      activeRequests: new Set(),
 
   // Actions
   fetchStats: async () => {
+    // Prevent duplicate requests
+    if (get().activeRequests.has('fetchStats')) {
+      return;
+    }
+    
+    set(state => ({
+      activeRequests: new Set([...state.activeRequests, 'fetchStats'])
+    }));
     const { lastFetched } = get();
     const now = Date.now();
     
@@ -48,39 +59,54 @@ const useDashboardStore = create(
         todaysEmails: todaysResult.count
       };
 
-      set({
+      set(state => ({
         stats: newStats,
         topContacts: contactsResult.contacts,
         isLoading: false,
         error: null,
-        lastFetched: now
-      });
+        lastFetched: now,
+        activeRequests: new Set([...state.activeRequests].filter(req => req !== 'fetchStats'))
+      }));
 
     } catch (error) {
-      set({
+      set(state => ({
         isLoading: false,
-        error: error.message
-      });
+        error: error.message,
+        activeRequests: new Set([...state.activeRequests].filter(req => req !== 'fetchStats'))
+      }));
     }
   },
 
   fetchActivityData: async (timeRange = null) => {
     const range = timeRange || get().selectedTimeRange;
-    set({ isLoading: true, error: null });
+    const requestKey = `fetchActivityData_${range}`;
+    
+    // Prevent duplicate requests
+    if (get().activeRequests.has(requestKey)) {
+      return;
+    }
+    
+    set(state => ({
+      isLoading: true, 
+      error: null,
+      activeRequests: new Set([...state.activeRequests, requestKey])
+    }));
     
     try {
       const result = await dashboardAPI.getEmailActivity(range);
-      set({
+      set(state => ({
         activityData: result.activity,
         selectedTimeRange: range,
         isLoading: false,
-        error: result.error || null
-      });
+        error: result.error || null,
+        activeRequests: new Set([...state.activeRequests].filter(req => !req.startsWith('fetchActivityData')))
+      }));
     } catch (error) {
-      set({
+      set(state => ({
         isLoading: false,
-        error: error.message
-      });
+        error: error.message,
+        activeRequests: new Set([...state.activeRequests].filter(req => !req.startsWith('fetchActivityData')))
+      }));
     }
   },
 
