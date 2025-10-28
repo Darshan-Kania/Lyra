@@ -96,12 +96,27 @@ VITE_API_TIMEOUT=0
 
 API endpoints from backend:
 
-- `GET /auth/status` - Check authentication
-- `GET /dashboard/userProfile` - Get user info
-- `GET /dashboard/EmailCount` - Get email counts
-- `GET /user/topContacts` - Get frequent contacts
-- `POST /auth/logout` - Logout user
-- `POST /updationFilter` - Update settings filters
+### Backend API paths
+
+- Auth
+	- `GET /auth/status` — check authentication
+	- `PATCH /auth/logout` — logout user
+	- `GET /dashboard/userProfile` — current user profile
+
+- Dashboard
+	- `GET /dashboard/EmailCount?label=<optional>` — counts
+	- `GET /dashboard/topContacts` — top contacts
+	- `GET /dashboard/activity?range=<week|month|year>` — activity data (used by chart)
+
+- Emails
+	- `GET /emails?page=<n>&limit=<n>` — paginated inbox
+	- `GET /emails/:id` — single email with body/summary
+	- `PATCH /emails/:id/read` — mark as read
+	- `PATCH /emails/:id/important` — mark important
+	- `POST /emails/:id/reply` — send reply
+
+- Settings
+	- `POST /updationFilter` — update email filters
 
 ## 📝 Notes
 

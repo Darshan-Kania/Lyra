@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store';
@@ -9,10 +9,30 @@ const SettingsPage = () => {
   const authStore = useAuthStore();
   const [emailFilters, setEmailFilters] = useState(['']);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
 
   // Get user info from auth store
   const userName = authStore.user?.name || 'Guest';
   const userEmail = authStore.user?.email || 'No email available';
+
+  // Fetch existing filters on component mount
+  useEffect(() => {
+    const fetchFilters = async () => {
+      setIsFetching(true);
+      try {
+        const response = await settingsAPI.getFilters();
+        if (response.success && response.data?.emailFilters) {
+          const filters = response.data.emailFilters;
+          setEmailFilters(filters.length > 0 ? filters : ['']);
+        }
+      } catch (error) {
+        console.error('Error fetching filters:', error);
+      }
+      setIsFetching(false);
+    };
+
+    fetchFilters();
+  }, []);
 
   const addEmailFilter = () => {
     setEmailFilters([...emailFilters, '']);
@@ -38,6 +58,7 @@ const SettingsPage = () => {
       const validFilters = emailFilters.filter(email => email.trim() !== '');
       const response = await settingsAPI.updateFilters(validFilters);
       if (response.success) {
+        alert('Settings saved successfully!');
         navigate('/dashboard');
       } else {
         alert('Failed to save settings. Please try again.');
@@ -48,6 +69,17 @@ const SettingsPage = () => {
     }
     setIsLoading(false);
   };
+
+  if (isFetching) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading settings...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
