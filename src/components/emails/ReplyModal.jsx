@@ -5,14 +5,30 @@ const ReplyModal = ({ isOpen, onClose, email, onSend }) => {
   const [replyBody, setReplyBody] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedReply, setSelectedReply] = useState(null);
+  const [showAIReplies, setShowAIReplies] = useState(true);
 
   // Reset state when modal opens/closes
   useEffect(() => {
     if (!isOpen) {
       setReplyBody('');
       setError(null);
+      setSelectedReply(null);
+      setShowAIReplies(true);
     }
   }, [isOpen]);
+
+  const handleSelectAIReply = (reply) => {
+    setSelectedReply(reply);
+    setReplyBody(reply.text);
+    setShowAIReplies(false);
+  };
+
+  const handleWriteMyOwn = () => {
+    setSelectedReply(null);
+    setReplyBody('');
+    setShowAIReplies(false);
+  };
 
   const handleSend = async () => {
     if (!replyBody.trim()) {
@@ -98,20 +114,93 @@ const ReplyModal = ({ isOpen, onClose, email, onSend }) => {
 
               {/* Reply Body */}
               <div className="flex-1 p-6 overflow-y-auto">
-                <textarea
-                  value={replyBody}
-                  onChange={(e) => setReplyBody(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Type your reply here..."
-                  className="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
-                  autoFocus
-                />
-                {error && (
-                  <p className="mt-2 text-sm text-red-600">{error}</p>
+                {/* AI Reply Options */}
+                {showAIReplies && email?.aiReplies && email.aiReplies.length > 0 && (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                      ✨ AI-Generated Reply Suggestions
+                    </h3>
+                    <div className="space-y-3">
+                      {email.aiReplies.map((reply, index) => (
+                        <motion.div
+                          key={index}
+                          whileHover={{ scale: 1.01 }}
+                          onClick={() => handleSelectAIReply(reply)}
+                          className="p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition-all"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className={`text-xs font-medium px-2 py-1 rounded ${
+                              reply.tone === 'Friendly' ? 'bg-green-100 text-green-700' :
+                              reply.tone === 'Neutral' ? 'bg-blue-100 text-blue-700' :
+                              'bg-purple-100 text-purple-700'
+                            }`}>
+                              {reply.tone}
+                            </span>
+                            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                          <p className="text-sm text-gray-700 whitespace-pre-wrap line-clamp-3">
+                            {reply.text}
+                          </p>
+                        </motion.div>
+                      ))}
+                      
+                      {/* Write My Own Option */}
+                      <motion.div
+                        whileHover={{ scale: 1.01 }}
+                        onClick={handleWriteMyOwn}
+                        className="p-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-indigo-500 hover:bg-gray-50 transition-all"
+                      >
+                        <div className="flex items-center gap-3">
+                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
+                          <span className="text-sm font-medium text-gray-700">Write My Own Reply</span>
+                        </div>
+                      </motion.div>
+                    </div>
+                  </div>
                 )}
-                <p className="mt-2 text-xs text-gray-500">
-                  Tip: Press Ctrl+Enter (Cmd+Enter on Mac) to send
-                </p>
+
+                {/* Text Area (shown when AI replies are hidden or no AI replies available) */}
+                {(!showAIReplies || !email?.aiReplies || email.aiReplies.length === 0) && (
+                  <>
+                    {selectedReply && (
+                      <div className="mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-medium text-indigo-700">
+                            Using {selectedReply.tone} tone
+                          </span>
+                          <button
+                            onClick={() => {
+                              setShowAIReplies(true);
+                              setSelectedReply(null);
+                              setReplyBody('');
+                            }}
+                            className="text-xs text-indigo-600 hover:text-indigo-800 underline"
+                          >
+                            Choose different reply
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    <textarea
+                      value={replyBody}
+                      onChange={(e) => setReplyBody(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="Type your reply here..."
+                      className="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
+                      autoFocus
+                    />
+                    {error && (
+                      <p className="mt-2 text-sm text-red-600">{error}</p>
+                    )}
+                    <p className="mt-2 text-xs text-gray-500">
+                      Tip: Press Ctrl+Enter (Cmd+Enter on Mac) to send
+                    </p>
+                  </>
+                )}
               </div>
 
               {/* Footer */}

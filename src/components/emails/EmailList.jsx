@@ -92,10 +92,14 @@ const EmailItem = ({ email, onSelect, isSelected }) => {
           {formatEmailDate(email.date)}
         </p>
       </div>
-      <p className="mt-1 font-medium text-sm text-gray-800 truncate">
+      <p className={`mt-1 text-sm truncate ${
+        email.read ? 'font-medium text-gray-800' : 'font-bold text-gray-900'
+      }`}>
         {email.subject}
       </p>
-      <p className="mt-1 text-sm text-gray-600 truncate">
+      <p className={`mt-1 text-sm truncate ${
+        email.read ? 'text-gray-600' : 'text-gray-700 font-medium'
+      }`}>
         {getTextPreview(email.body, email.plainbody)}
       </p>
     </motion.div>
