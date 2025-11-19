@@ -112,6 +112,7 @@ const EmailsPage = () => {
             onCategoryChange={handleCategoryChange}
             unreadCount={unreadCount}
             isLoading={isLoading}
+            onCompose={() => setIsComposeModalOpen(true)}
           />
         )}
 

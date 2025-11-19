@@ -88,7 +88,8 @@ const EmailItem = ({ email, onSelect, isSelected }) => {
 const EmailSidebar = ({ 
   selectedCategory,
   onCategoryChange,
-  unreadCount
+  unreadCount,
+  onCompose
 }) => {
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col flex-shrink-0">
@@ -96,7 +97,8 @@ const EmailSidebar = ({
       <div className="p-4">
         <motion.button 
           whileHover={{ scale: 1.03 }} 
-          whileTap={{ scale: 0.97 }} 
+          whileTap={{ scale: 0.97 }}
+          onClick={onCompose}
           className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium shadow hover:bg-indigo-700 transition-colors"
         >
           Compose
