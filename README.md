@@ -1,129 +1,96 @@
-# MailFlare - Modular React Email Client
+# 🌟 Lyra Frontend – MailFlare React Client
 
-A modern, modular React email client built with Vite, Zustand for state management, and a clean component architecture.
+Lyra is the **modern, modular React frontend** for **MailFlare**, built with **Vite**, **Zustand**, **Tailwind**, and **clean component architecture**. It provides the user interface for viewing emails, reading AI summaries, sending replies, managing inbox states, and displaying dashboard analytics.
 
-## 🏗️ Project Structure
+This README is fully rewritten and aligned with your complete MailFlare system architecture.
 
-````
+---
+
+# 🚀 Overview
+
+Lyra connects with the **Velora backend** and **N8N AI engine** to deliver a fast, smooth, and intelligent email‑management UI.
+
+### ✨ Core Highlights
+
+* 🔑 Google OAuth login (via backend)
+* 📬 Inbox list view (paginated)
+* 📨 Full email detail page
+* 🤖 AI summary with 3 quick‑reply suggestions
+* 💬 Reply‑send workflow
+* 📊 Dashboard charts (Recharts)
+* 🎛️ Zustand‑based stores for clean state management
+* 🎨 Tailwind UI with Framer Motion animations
+* 📱 Responsive layout (sidebar toggle on mobile)
+* 🔄 Graceful fallback UI if backend is down
+
+---
+
+# 🧱 Project Structure
+
+```
 src/
-├── api/                    # API abstraction layer
-│   ├── client.js          # Axios client configuration
-│   ├── auth.js            # Authentication API methods
-│   ├── dashboard.js       # Dashboard/stats API methods
-│   ├── emails.js          # Email management API methods
-│   ├── settings.js        # Settings API methods
-│   └── index.js           # API exports
-├── store/                  # Zustand state stores
-│   ├── authStore.js       # Authentication state
-│   ├── dashboardStore.js  # Dashboard data & stats
-│   ├── emailsStore.js     # Email data & management
-│   └── index.js           # Store exports
-├── components/             # Reusable components
-│   ├── common/            # Shared layout components
-│   │   ├── AppLayout.jsx  # Main app layout
-│   │   └── Footer.jsx     # Footer component
-│   ├── dashboard/         # Dashboard-specific components
+├── api/                     # API abstraction layer
+│   ├── client.js            # Axios configuration + interceptors
+│   ├── auth.js              # Authentication API
+│   ├── dashboard.js         # Dashboard & stats APIs
+│   ├── emails.js            # Email fetch/modify APIs
+│   ├── settings.js          # Filter/update APIs
+│   └── index.js             # API exports
+│
+├── store/                   # Zustand stores
+│   ├── authStore.js         # Auth state & session
+│   ├── dashboardStore.js    # Counts, stats, activity
+│   ├── emailsStore.js       # Inbox list, selected email, actions
+│   └── index.js             # Export entry
+│
+├── components/
+│   ├── common/
+│   │   ├── AppLayout.jsx    # Main shell layout
+│   │   └── Footer.jsx
+│   │
+│   ├── dashboard/
 │   │   ├── DashboardHeader.jsx
 │   │   ├── DashboardStats.jsx
 │   │   ├── ActivityChart.jsx
 │   │   ├── QuickActions.jsx
 │   │   ├── TopContacts.jsx
-# MailFlare
 │   │   └── index.js
-│   ├── emails/            # Email-specific components
-│   │   ├── EmailsHeader.jsx
-# MailFlare
-
-Modern React email client with AI‑assisted workflows.
-
-## Features
-- Inbox list view (full‑width) with familiar email browsing
-- Full‑screen email detail route with clean reading experience
-- AI summary of each email’s content
-- Three AI quick‑reply suggestions with Send action
-- Simple, local loading states (no global loader/bus)
-- Sidebar toggle on smaller screens
-- Pagination and basic importance/read states
-- Graceful fallback data when backend is unavailable
-
-## Libraries (what we used and where)
-- React + Vite — application UI and fast dev/build tooling
-- React Router — navigation (list: /emails, detail: /emails/:id)
-- Zustand — app state (auth, dashboard, emails)
-- Axios — HTTP client with light interceptors (no global side-effects)
-- Tailwind CSS — styling system for rapid, consistent UI
-- Framer Motion — micro‑interactions and subtle animations
-- Recharts — dashboard charts and visualizations
- 
-4. **Components** receive data via props and emit events via callbacks
-
-## 🧪 Development
-
-### Getting Started
-
-```bash
-npm install
-npm run dev
-````
-
-## 📦 Building for Production
-
-```bash
-npm run build
-npm run preview
+│   │
+│   ├── emails/
+│       ├── EmailsHeader.jsx
+│       ├── EmailList.jsx
+│       ├── EmailItem.jsx
+│       ├── EmailDetail.jsx
+│       ├── SummaryBox.jsx
+│       ├── ReplySuggestions.jsx
+│       └── Pagination.jsx
+│
+├── pages/                   # Route pages
+├── routes/                  # React Router config
+├── utils/                   # Helpers
+└── main.jsx
 ```
 
-## 🚧 Future Improvements
+---
 
-1. **Add TypeScript** for better type safety
-2. **Email Compose** functionality
-3. **Real-time Updates** with WebSocket integration
-4. **Email Search** and advanced filtering
-5. **Offline Support** with service workers
-6. **Unit Tests** with Vitest and React Testing Library
-7. **E2E Tests** with Playwright
-8. **Performance Monitoring** with analytics
+# 🎨 UI & UX Principles
 
-## 🔗 API Integration
+* Clean, modern email‑client layout similar to Gmail/Hey
+* Inbox → detail is fullscreen for distraction‑free reading
+* Subtle Framer Motion animations (fade, slide, transitions)
+* AI summary always visible on right side
+* Reply suggestions styled as quick‑action cards
+* Optimistic UI for read/important toggles
 
-The application is designed to work with a backend API. Set your backend URL and optional timeout in the environment:
+---
 
-```bash
+# 🔗 API Integration
+
+Lyra communicates directly with the **Velora backend API**.
+
+### Environment Variables
+
+```
 VITE_BACKEND_URL=http://localhost:3001
-# 0 disables timeout (good for dev), or set to e.g. 30000 for 30s
-VITE_API_TIMEOUT=0
+
 ```
-
-API endpoints from backend:
-
-### Backend API paths
-
-- Auth
-	- `GET /auth/status` — check authentication
-	- `PATCH /auth/logout` — logout user
-	- `GET /dashboard/userProfile` — current user profile
-
-- Dashboard
-	- `GET /dashboard/EmailCount?label=<optional>` — counts
-	- `GET /dashboard/topContacts` — top contacts
-	- `GET /dashboard/activity?range=<week|month|year>` — activity data (used by chart)
-
-- Emails
-	- `GET /emails?page=<n>&limit=<n>` — paginated inbox
-	- `GET /emails/:id` — single email with body/summary
-	- `PATCH /emails/:id/read` — mark as read
-	- `PATCH /emails/:id/important` — mark important
-	- `POST /emails/:id/reply` — send reply
-
-- Settings
-	- `POST /updationFilter` — update email filters
-
-## 📝 Notes
-
-- This refactor centralizes all API calls in `src/api` and store actions
-- UI components do not call HTTP directly—stores/hooks handle it
-- Intelligent caching in stores reduces API calls
-- Clean separation of concerns improves maintainability
-
-### Environment files
-- `VITE_API_TIMEOUT` defaults to 0 (no timeout) to avoid blank pages on slow responses during development.
