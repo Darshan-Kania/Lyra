@@ -31,16 +31,6 @@ const QuickActions = ({ onNavigate, onLogout }) => {
       )
     },
     {
-      label: 'Compose',
-      onClick: () => {/* TODO: Implement compose */},
-      iconColor: 'text-green-600',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-        </svg>
-      )
-    },
-    {
       label: 'Settings',
       onClick: () => onNavigate('/settings'),
       iconColor: 'text-purple-600',
@@ -64,9 +54,9 @@ const QuickActions = ({ onNavigate, onLogout }) => {
   ];
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+    <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 mb-8">
       <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         {actions.map((action, index) => (
           <QuickActionCard 
             key={index}
