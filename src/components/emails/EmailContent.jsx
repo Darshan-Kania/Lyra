@@ -183,28 +183,65 @@ const EmailContent = ({ selectedEmail, isLoading }) => {
           )}
           
           {/* AI Replies */}
-          {Array.isArray(selectedEmail.aiReplies) && selectedEmail.aiReplies.length > 0 && (
-            <div className="mt-6">
-              <div className="mb-3 text-sm font-semibold text-gray-700">Quick AI Replies</div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {selectedEmail.aiReplies.slice(0,3).map((reply, idx) => (
-                  <div key={idx} className="p-3 border rounded-md bg-gray-50 flex flex-col">
-                    <p className="text-sm text-gray-800 flex-1">{reply}</p>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => handleSend(reply)}
-                      disabled={sendingId === reply}
-                      className="mt-3 inline-flex items-center justify-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60"
-                    >
-                      {sendingId === reply ? 'Sending…' : 'Send'}
-                    </motion.button>
-                  </div>
-                ))}
+          {Array.isArray(selectedEmail.aiReplies) && selectedEmail.aiReplies.length > 0 && (() => {
+            // Filter and normalize replies - handle both old format (strings) and new format (objects)
+            const validReplies = selectedEmail.aiReplies
+              .filter(reply => {
+                // New format: {tone, text}
+                if (typeof reply === 'object' && reply !== null && reply.tone && reply.text) {
+                  return true;
+                }
+                // Old format: just strings (for backward compatibility)
+                if (typeof reply === 'string') {
+                  return true;
+                }
+                return false;
+              })
+              .slice(0, 3);
+            
+            if (validReplies.length === 0) return null;
+            
+            return (
+              <div className="mt-6">
+                <div className="mb-3 text-sm font-semibold text-gray-700">Quick AI Replies</div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {validReplies.map((reply, idx) => {
+                    // Normalize to new format
+                    const isNewFormat = typeof reply === 'object' && reply !== null;
+                    const tone = isNewFormat ? reply.tone : 'Neutral';
+                    const text = isNewFormat ? reply.text : reply;
+                    
+                    return (
+                      <div key={idx} className="p-3 border rounded-md bg-gray-50 flex flex-col">
+                        {isNewFormat && (
+                          <div className="mb-2">
+                            <span className={`text-xs font-medium px-2 py-0.5 rounded ${
+                              tone === 'Friendly' ? 'bg-green-100 text-green-700' :
+                              tone === 'Neutral' ? 'bg-blue-100 text-blue-700' :
+                              'bg-purple-100 text-purple-700'
+                            }`}>
+                              {tone}
+                            </span>
+                          </div>
+                        )}
+                        <p className="text-sm text-gray-800 flex-1 line-clamp-3">{String(text)}</p>
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => handleSend(String(text))}
+                          disabled={sendingId === String(text)}
+                          className="mt-3 inline-flex items-center justify-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60"
+                        >
+                          {sendingId === String(text) ? 'Sending…' : 'Send'}
+                        </motion.button>
+                      </div>
+                    );
+                  })}
+                </div>
+                {sendError && <p className="mt-2 text-sm text-red-600">{sendError}</p>}
               </div>
-              {sendError && <p className="mt-2 text-sm text-red-600">{sendError}</p>}
-            </div>
-          )}
+            );
+          })()}
 
           {/* Email Actions - Hide for sent emails */}
           {!selectedEmail.isSent && (

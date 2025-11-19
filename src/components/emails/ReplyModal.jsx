@@ -121,7 +121,7 @@ const ReplyModal = ({ isOpen, onClose, email, onSend }) => {
                       ✨ AI-Generated Reply Suggestions
                     </h3>
                     <div className="space-y-3">
-                      {email.aiReplies.map((reply, index) => (
+                      {email.aiReplies.filter(reply => reply && reply.tone && reply.text).map((reply, index) => (
                         <motion.div
                           key={index}
                           whileHover={{ scale: 1.01 }}
@@ -141,7 +141,7 @@ const ReplyModal = ({ isOpen, onClose, email, onSend }) => {
                             </svg>
                           </div>
                           <p className="text-sm text-gray-700 whitespace-pre-wrap line-clamp-3">
-                            {reply.text}
+                            {String(reply.text)}
                           </p>
                         </motion.div>
                       ))}
@@ -166,11 +166,11 @@ const ReplyModal = ({ isOpen, onClose, email, onSend }) => {
                 {/* Text Area (shown when AI replies are hidden or no AI replies available) */}
                 {(!showAIReplies || !email?.aiReplies || email.aiReplies.length === 0) && (
                   <>
-                    {selectedReply && (
+                    {selectedReply && selectedReply.tone && (
                       <div className="mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
                         <div className="flex items-center justify-between">
                           <span className="text-xs font-medium text-indigo-700">
-                            Using {selectedReply.tone} tone
+                            Using {String(selectedReply.tone)} tone
                           </span>
                           <button
                             onClick={() => {

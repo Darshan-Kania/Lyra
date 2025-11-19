@@ -11,8 +11,17 @@ const normalizeAiReplies = (email) => {
     email.replies ||
     [];
   if (!Array.isArray(replies)) return [];
-  // Trim to first 3 concise suggestions
-  return replies.filter(Boolean).slice(0, 3);
+  
+  // Ensure each reply has the correct structure {tone, text}
+  const validReplies = replies.filter(reply => {
+    if (typeof reply === 'object' && reply !== null) {
+      return reply.tone && reply.text;
+    }
+    return false;
+  });
+  
+  // Return up to 3 valid replies
+  return validReplies.slice(0, 3);
 };
 
 // Helper function to transform backend email data to frontend format
