@@ -9,6 +9,21 @@ const ActivityChart = ({ activityData, selectedTimeRange, onTimeRangeChange, isL
     { value: 'year', label: 'Year' }
   ];
 
+  // Format tooltip to show proper labels
+  const CustomTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+          <p className="text-sm font-semibold text-gray-900">{payload[0].payload.day}</p>
+          <p className="text-sm text-indigo-600 font-medium">
+            {payload[0].value} {payload[0].value === 1 ? 'email' : 'emails'}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="bg-white rounded-xl shadow-sm p-6 mb-8 border border-gray-100">
       <div className="flex justify-between items-center mb-6">
@@ -59,14 +74,7 @@ const ActivityChart = ({ activityData, selectedTimeRange, onTimeRangeChange, isL
                 tickLine={false} 
                 tick={{ fontSize: 12 }}
               />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: '#f8fafc',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  fontSize: '14px'
-                }}
-              />
+              <Tooltip content={<CustomTooltip />} />
               <Line
                 type="monotone"
                 dataKey="emails"
