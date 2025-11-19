@@ -57,6 +57,40 @@ export const emailsAPI = {
         return { items, total, currentPage, totalPages, message, explicitFailure };
       };
 
+      // Transform sent emails to match inbox email structure
+      const transformSentEmail = (sentEmail) => ({
+        id: sentEmail._id,
+        sender: sentEmail.to || "Unknown", // For sent emails, "to" is like the sender
+        senderEmail: sentEmail.to || "",
+        subject: sentEmail.subject || "No subject",
+        body: sentEmail.body || "",
+        plainbody: sentEmail.body || "",
+        date: sentEmail.sentAt || sentEmail.createdAt,
+        read: true, // Sent emails are always "read"
+        important: false,
+        gmailMessageId: sentEmail.gmailMessageId,
+        isSent: true, // Flag to identify sent emails
+        threadId: sentEmail.threadId,
+        originalEmailId: sentEmail.originalEmail?._id,
+      });
+
+      if (filter === "sent") {
+        // Fetch sent emails from separate endpoint
+        const response = await apiClient.get(`/emails/sent?page=${page}&limit=${limit}`);
+        const { items, total, totalPages, currentPage, message, explicitFailure } = normalizeList(response.data, page, limit);
+        if (explicitFailure && (!items || items.length === 0)) {
+          return { success: false, emails: [], totalCount: 0, totalPages: 1, currentPage: page, error: message || "Failed to fetch sent emails" };
+        }
+        const transformedEmails = items.map(transformSentEmail);
+        return {
+          success: true,
+          emails: transformedEmails,
+          totalCount: total,
+          totalPages: totalPages,
+          currentPage: currentPage,
+        };
+      }
+
       if (filter === "important") {
         // Fetch many to allow client-side filtering of important items
         const response = await apiClient.get(`/emails?page=1&limit=1000`);
@@ -172,7 +206,7 @@ export const emailsAPI = {
     }
   },
 
-  // Send a reply (uses backend endpoint if available)
+  // Send a reply to an email (uses backend endpoint if available)
   sendReply: async (emailId, message) => {
     try {
       const response = await apiClient.post(`/emails/${emailId}/reply`, {
@@ -184,6 +218,26 @@ export const emailsAPI = {
       };
     } catch (error) {
       console.warn(`Send reply failed for email ${emailId}:`, error.message);
+      return { success: false, error: error.message };
+    }
+  },
+
+  // Compose and send a new email
+  composeEmail: async ({ to, cc, bcc, subject, body }) => {
+    try {
+      const response = await apiClient.post('/emails/compose', {
+        to,
+        cc,
+        bcc,
+        subject,
+        body,
+      });
+      return {
+        success: response.data?.success !== false,
+        data: response.data,
+      };
+    } catch (error) {
+      console.warn('Compose email failed:', error.message);
       return { success: false, error: error.message };
     }
   },

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useEmailsStore from '../../store/emailsStore.js';
+import ReplyModal from './ReplyModal.jsx';
 
 const EmailContent = ({ selectedEmail, isLoading }) => {
   // Keep component pure and quiet in production
@@ -9,6 +10,7 @@ const EmailContent = ({ selectedEmail, isLoading }) => {
   // Hooks must be called unconditionally and in the same order
   const [sendingId, setSendingId] = useState(null);
   const [sendError, setSendError] = useState(null);
+  const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
   const sendReply = useEmailsStore(s => s.sendReply);
 
   if (isLoading) {
@@ -79,16 +81,24 @@ const EmailContent = ({ selectedEmail, isLoading }) => {
                 {selectedEmail.subject}
               </h1>
               
-              {selectedEmail.important && (
-                <div className="flex-shrink-0">
+              <div className="flex gap-2">
+                {selectedEmail.isSent && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Sent
+                  </span>
+                )}
+                {selectedEmail.important && (
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
                     <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 2L13.09 8.26L20 9L15 13.74L16.18 20.02L10 16.77L3.82 20.02L5 13.74L0 9L6.91 8.26L10 2Z" clipRule="evenodd" />
                     </svg>
                     Important
                   </span>
-                </div>
-              )}
+                )}
+              </div>
             </div>
             
             <div className="flex items-center space-x-4">
@@ -97,6 +107,7 @@ const EmailContent = ({ selectedEmail, isLoading }) => {
                   {selectedEmail.sender[0].toUpperCase()}
                 </div>
                 <div>
+                  <p className="text-sm text-gray-500">{selectedEmail.isSent ? 'To:' : 'From:'}</p>
                   <p className="font-semibold text-gray-900">{selectedEmail.sender}</p>
                 </div>
               </div>
@@ -169,34 +180,48 @@ const EmailContent = ({ selectedEmail, isLoading }) => {
             </div>
           )}
 
-          {/* Email Actions */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <div className="flex items-center space-x-4">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                </svg>
-                Reply
-              </motion.button>
-              
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-              >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                </svg>
-                Forward
-              </motion.button>
+          {/* Email Actions - Hide for sent emails */}
+          {!selectedEmail.isSent && (
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <div className="flex items-center space-x-4">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setIsReplyModalOpen(true)}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                  </svg>
+                  Reply
+                </motion.button>
+                
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                >
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                  </svg>
+                  Forward
+                </motion.button>
+              </div>
             </div>
-          </div>
+          )}
         </motion.div>
       </AnimatePresence>
+
+      {/* Reply Modal */}
+      <ReplyModal
+        isOpen={isReplyModalOpen}
+        onClose={() => setIsReplyModalOpen(false)}
+        email={selectedEmail}
+        onSend={async (body) => {
+          const result = await sendReply(selectedEmail.id, body);
+          return result;
+        }}
+      />
     </div>
   );
 };

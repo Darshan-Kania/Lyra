@@ -181,6 +181,16 @@ const useEmailsStore = create(
         }
       },
 
+      // Compose and send a new email
+      composeEmail: async (emailData) => {
+        try {
+          const res = await emailsAPI.composeEmail(emailData);
+          return res;
+        } catch (error) {
+          return { success: false, error: error.message };
+        }
+      },
+
       // Reset emails state
       reset: () =>
         set({

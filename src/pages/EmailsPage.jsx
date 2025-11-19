@@ -7,10 +7,12 @@ import {
   EmailSidebar,
   EmailList
 } from '../components/emails';
+import ComposeModal from '../components/emails/ComposeModal';
 
 const EmailsPage = () => {
   const navigate = useNavigate();
   const [showSidebar, setShowSidebar] = useState(true);
+  const [isComposeModalOpen, setIsComposeModalOpen] = useState(false);
   // list-only page
   
   // Zustand email store with selectors
@@ -25,7 +27,8 @@ const EmailsPage = () => {
     error,
     fetchEmails,
     setCategory,
-    setPage
+    setPage,
+    composeEmail
   } = useEmailSelectors();
 
   useEffect(() => {
@@ -88,6 +91,7 @@ const EmailsPage = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       <EmailsHeader 
         unreadCount={unreadCount}
+        onCompose={() => setIsComposeModalOpen(true)}
       />
       
       <main className="flex-grow flex min-h-0">
@@ -123,6 +127,20 @@ const EmailsPage = () => {
           fullWidth
         />
       </main>
+
+      {/* Compose Modal */}
+      <ComposeModal
+        isOpen={isComposeModalOpen}
+        onClose={() => setIsComposeModalOpen(false)}
+        onSend={async (emailData) => {
+          const result = await composeEmail(emailData);
+          if (result.success) {
+            // Refresh emails after sending
+            await fetchEmails(true);
+          }
+          return result;
+        }}
+      />
     </div>
   );
 };
